@@ -1,0 +1,10 @@
+Skin color grading
+
+| Level | Name          | Represents                          |
+| ----- | ------------- | ----------------------------------- |
+| 1     | **Ivory**     | Very light / pale tone              |
+| 2     | **Sandstone** | Light tan / fair beige              |
+| 3     | **Bronze**    | Medium brown / golden brown         |
+| 4     | **Umber**     | Deep brown / chocolatey tone        |
+| 5     | **Onyx**      | Very dark brown / nearly black skin |
+

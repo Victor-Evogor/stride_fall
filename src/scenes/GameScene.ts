@@ -1,7 +1,8 @@
 import Phaser from "phaser";
 import type { AppContextType } from "../AppContext";
+import { MOB_SPEEDS } from "../constants";
 
-import damageBar from "../assets/UI/MinimumDamage/minimum_damage.png"
+import damageBar from "../assets/UI/MinimumDamage/minimum_damage.png";
 
 // characters
 import onyxMaleCharacter from "../assets/character_assets/male/skin/onyx.png";
@@ -46,8 +47,7 @@ class GameScene extends Phaser.Scene {
   mobs: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody[] = [];
   mobSpawnTimer: number = 0;
   health: number = 8;
-  healthBar: Phaser.GameObjects.Sprite | null =  null;
-  
+  healthBar: Phaser.GameObjects.Sprite | null = null;
 
   constructor() {
     super("GameScene");
@@ -97,8 +97,8 @@ class GameScene extends Phaser.Scene {
     });
     this.load.spritesheet("healthBar", damageBar, {
       frameWidth: 64,
-      frameHeight: 16
-    })
+      frameHeight: 16,
+    });
   }
 
   create() {
@@ -119,7 +119,10 @@ class GameScene extends Phaser.Scene {
     this.birdSpawnTimer = 0;
     this.nextBirdSpawnDelay = Phaser.Math.Between(1000, 3000); // spawn delay in ms
 
-    this.healthBar = this.add.sprite(200, 50, "healthBar").setScale(3).setDepth(4)
+    this.healthBar = this.add
+      .sprite(200, 50, "healthBar")
+      .setScale(3)
+      .setDepth(4);
 
     const getRandomColumnIndex = () => {
       const r = Math.random();
@@ -383,14 +386,17 @@ class GameScene extends Phaser.Scene {
       });
     });
 
-    [7,6,5,4,3,2,1,0].forEach(((healthStatus, index) => {
+    [7, 6, 5, 4, 3, 2, 1, 0].forEach((healthStatus, index) => {
       this.anims.create({
         key: `health-${healthStatus}`,
-        frames: this.anims.generateFrameNumbers("healthBar", {start: 2 + 6 * index, end: 2 + 6 * index + 5}),
+        frames: this.anims.generateFrameNumbers("healthBar", {
+          start: 2 + 6 * index,
+          end: 2 + 6 * index + 5,
+        }),
         frameRate: 2,
-        repeat: 0
-      })
-    }))
+        repeat: 0,
+      });
+    });
 
     this.character = this.physics.add
       .sprite(100, this.groundHeight, "onyxMaleCharacter")
@@ -413,7 +419,12 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.character, this.platform);
 
     this.input.keyboard?.on("keydown-SPACE", () => {
-      if (this.character && this.character.body && this.gameStarted && !this.playerDied) {
+      if (
+        this.character &&
+        this.character.body &&
+        this.gameStarted &&
+        !this.playerDied
+      ) {
         const body = this.character.body as Phaser.Physics.Arcade.Body;
         if (body.blocked.down) {
           this.character.setVelocityY(-500);
@@ -442,7 +453,6 @@ class GameScene extends Phaser.Scene {
     const body = this.character.body as Phaser.Physics.Arcade.Body;
 
     if (body.velocity.y < -10 && !body.blocked.down && this.gameStarted) {
-      // console.log("jumping")
       this.character.play("jump-rise");
     } else if (body.velocity.y > 10 && !body.blocked.down && this.gameStarted) {
       this.character.play("jump-fall", true);
@@ -469,10 +479,9 @@ class GameScene extends Phaser.Scene {
       const max = this.maxScrollSpeed;
       const base = this.baseScrollSpeed;
 
-      if(!this.playerDied)
-      this.scrollSpeed = base + (max - base) * (1 - Math.exp(-k * t));
-      else
-        this.scrollSpeed = 0;
+      if (!this.playerDied)
+        this.scrollSpeed = base + (max - base) * (1 - Math.exp(-k * t));
+      else this.scrollSpeed = 0;
 
       this.bgElements.forEach((obj) => {
         obj.x -= this.scrollSpeed * (delta / 1000);
@@ -484,7 +493,12 @@ class GameScene extends Phaser.Scene {
 
       // --- MOB MOVEMENT ---
       this.mobs = this.mobs.filter((mob) => {
-        mob.x -= this.scrollSpeed * (delta / 1000);
+        if (!this.playerDied && !mob.getData("isKillerMob"))
+          mob.x -=
+            mob.getData("speed") * (delta / 1000) +
+            this.scrollSpeed * (delta / 1000);
+        else if (mob.getData("isKillerMob")) mob.x -= 0;
+        else mob.x -= mob.getData("speed") * (delta / 1000);
         if (mob.x < -100) {
           mob.destroy();
           return false;
@@ -493,13 +507,13 @@ class GameScene extends Phaser.Scene {
       });
 
       // --- MOB SPAWNING ---
-      if (!this.playerDied){
+      if (!this.playerDied) {
         this.mobSpawnTimer += delta;
-      if (this.mobSpawnTimer >= this.getSpawnInterval()) {
-        this.mobSpawnTimer = 0;
-        const type = this.selectMobTypeBySpeed();
-        this.spawnMob(type);
-      }
+        if (this.mobSpawnTimer >= this.getSpawnInterval()) {
+          this.mobSpawnTimer = 0;
+          const type = this.selectMobTypeBySpeed();
+          this.spawnMob(type);
+        }
       }
     }
 
@@ -540,8 +554,6 @@ class GameScene extends Phaser.Scene {
     this.birds.push(bird);
   }
 
-  
-
   spawnMob(type: "snail" | "bee" | "boar") {
     if (!this.platform || !this.character) return;
     const x = (this.sys.game.config.width as number) + 100;
@@ -554,16 +566,18 @@ class GameScene extends Phaser.Scene {
       mob.play("snail-run");
       this.physics.add.collider(mob, this.platform);
       mob.play("snail-run");
-      mob.setScale(2.5)
-      mob.setSize(19, 20)
-    mob.body.setOffset(19, 12);
+      mob.setScale(2.5);
+      mob.setSize(19, 20);
+      mob.body.setOffset(19, 12);
+      mob.setData("speed", MOB_SPEEDS.snail);
     } else if (type === "bee") {
       mob = this.physics.add
         .sprite(x, this.groundHeight - 100, "bee")
         .setOrigin(0.5, 1);
       mob.play("bee-fly");
       mob.body.setAllowGravity(false);
-      mob.setScale(1.5)
+      mob.setScale(1.5);
+      mob.setData("speed", MOB_SPEEDS.bee);
     } else if (type === "boar") {
       const boarColors = ["brownBoar", "blackBoar", "whiteBoar"];
       const selected = Phaser.Utils.Array.GetRandom(boarColors);
@@ -571,15 +585,18 @@ class GameScene extends Phaser.Scene {
       this.physics.add.collider(mob, this.platform);
       mob.setData("boarType", selected);
       mob.play(`${selected}-run`);
-      mob.setScale(2.5)
+      mob.setScale(2.5);
       mob.body.setOffset(0, 2);
+      mob.setData("speed", MOB_SPEEDS.boar);
     }
 
     if (!mob) throw new Error("Mob type " + type + " not known");
 
-    mob.setVelocityX(-this.scrollSpeed);
+    // mob.setVelocityX(-(mob.getData("speed")));
     mob.setData("type", type);
-    mob.setDepth(3)
+    mob.setData("isKillerMob", false);
+    mob.setDepth(3);
+    this.mobs.push(mob);
     this.physics.add.overlap(this.character, mob, () =>
       this.handleMobCollision(mob)
     );
@@ -588,41 +605,43 @@ class GameScene extends Phaser.Scene {
   handleMobCollision(mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     const type = mob.getData("type");
     if (!this.character || this.playerDied) return;
-  
+
     const body = this.character.body as Phaser.Physics.Arcade.Body;
-  
+
     // Always deduct health and update UI
     const isJumping = !body.blocked.down;
-  
+
     if (type === "bee") {
       if (isJumping) {
         this.health--;
         this.updateHealthBarGui(this.health); // ← Always update UI after health change
-  
+
         if (this.health <= 0) {
+          mob.setData("isKillerMob", true);
           this.killPlayer(mob);
           return;
         }
-  
+
         mob.play("bee-die");
         mob.setVelocityX(0);
         mob.setGravityY(1000); // fall down
         return;
       }
-  
+
       // player is not jumping → bee missed
       return;
     }
-  
+
     // Not a bee (snail or boar)
     this.health--;
     this.updateHealthBarGui(this.health);
-  
+
     if (this.health <= 0) {
       this.killPlayer(mob);
+      mob.setData("isKillerMob", true);
       return;
     }
-  
+
     // Mob death logic (only if player survived)
     if (type === "snail") {
       mob.play("snail-die");
@@ -634,13 +653,13 @@ class GameScene extends Phaser.Scene {
       mob.setVelocityX(0);
       this.time.delayedCall(1000, () => mob.destroy());
     }
-  
+
     // Flash red
     this.character.setTint(0xff0000);
     this.tweens.add({
       targets: this.character,
       alpha: 0.2,
-      ease: 'Linear',
+      ease: "Linear",
       duration: 100,
       yoyo: true,
       repeat: 3,
@@ -650,7 +669,6 @@ class GameScene extends Phaser.Scene {
       },
     });
   }
-  
 
   killPlayer(killerMob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     if (!this.character) return;
@@ -662,10 +680,8 @@ class GameScene extends Phaser.Scene {
 
     if (type === "snail") {
       killerMob.play("snail-hide");
-      killerMob.setVelocityX(0);
       this.time.delayedCall(2000, () => {
         killerMob.play("snail-comeout");
-        killerMob.setVelocityX(0);
       });
     } else if (type === "boar") {
       const boarType = killerMob.getData("boarType");
@@ -691,8 +707,8 @@ class GameScene extends Phaser.Scene {
     return "snail";
   }
 
-  updateHealthBarGui(health: number){
-    if (!this.healthBar) return
+  updateHealthBarGui(health: number) {
+    if (!this.healthBar) return;
     this.healthBar.play(`health-${health}`);
   }
 }

@@ -1,10 +1,13 @@
 import buttonBg from "../assets/UI/Button_52x14.png"
 import buttonHighlight from "../assets/UI/HighlightButton_60x23.png"
 import rectangeBg from "../assets/UI/RectangleBox_96x96.png"
+import { useAppContext } from "../AppContext"
 
 const Controls = () => {
+    const { isGamePlaying, setIsGamePlaying } = useAppContext()
+    if (isGamePlaying) return null; // Don't render controls when the game is playing
     const buttons = [
-        { label: 'START', action: () => console.log('Start button clicked') },
+        { label: 'START', action: () => setIsGamePlaying(true) },
         { label: 'SHOP', action: () => console.log('Stop button clicked') },
         { label: 'RESET', action: () => console.log('Reset button clicked') }
     ]
@@ -17,7 +20,7 @@ const Controls = () => {
             imageRendering: 'pixelated'
         }}>
             {
-                buttons.map(({label}, index) => (
+                buttons.map(({label, action}, index) => (
                     <button 
                         key={index}
                         className="group relative w-20 h-8 sm:w-24 sm:h-10 active:scale-95 transform transition-all duration-150 cursor-pointer"
@@ -27,6 +30,7 @@ const Controls = () => {
                     backgroundRepeat: 'no-repeat',
                     imageRendering: 'pixelated'
                 }}
+                onClick={action}
             >
                 <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"

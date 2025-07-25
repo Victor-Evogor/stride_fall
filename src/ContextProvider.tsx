@@ -1,26 +1,24 @@
 import {
-  createContext,
   useState,
   type FunctionComponent,
-  type PropsWithChildren,
-  type Dispatch,
-  type SetStateAction,
+  type PropsWithChildren
 } from "react";
 
-interface AppContextType {
-  isGamePlaying: boolean;
-  setIsGamePlaying: Dispatch<SetStateAction<boolean>>;
-}
+import { AppContext } from "./AppContext";
 
-const AppContext = createContext<AppContextType | null>(null);
 
 const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const [isGamePlaying, setIsGamePlaying] = useState(false);
+  const [score, setScore] = useState(0);
+  
+
   return (
     <AppContext.Provider
       value={{
         isGamePlaying,
         setIsGamePlaying,
+        score,
+        setScore
       }}
     >
       {children}

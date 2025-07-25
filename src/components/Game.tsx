@@ -1,12 +1,20 @@
 import { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import GameScene from "../scenes/GameScene";
-// import rocks from "../assets/bg_assets/Props-Rocks.png"  
+import { useAppContext } from "../AppContext";
+import { type AppContextType } from "../AppContext";
 
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
+  const ctx = useAppContext();
+
+useEffect(()=>{
+    (window as { REACT_CONTEXT?: AppContextType })
+          .REACT_CONTEXT = ctx
+  }, [ctx.isGamePlaying])
 
   useEffect(() => {
+
     let game: Phaser.Game | null = null;
 
     const initGame = () => {

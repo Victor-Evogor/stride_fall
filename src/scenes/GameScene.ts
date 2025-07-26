@@ -48,6 +48,7 @@ class GameScene extends Phaser.Scene {
   mobSpawnTimer: number = 0;
   health: number = 8;
   healthBar: Phaser.GameObjects.Sprite | null = null;
+  distance: number = 0
 
   constructor() {
     super("GameScene");
@@ -452,6 +453,11 @@ class GameScene extends Phaser.Scene {
 
     const body = this.character.body as Phaser.Physics.Arcade.Body;
 
+    const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
+      .REACT_CONTEXT;
+      if(reactCtx)
+      this.distance = reactCtx.score;
+
     if (body.velocity.y < -10 && !body.blocked.down && this.gameStarted && !this.playerDied) {
       this.character.play("jump-rise");
     } else if (body.velocity.y > 10 && !body.blocked.down && this.gameStarted && !this.playerDied) {
@@ -513,7 +519,7 @@ class GameScene extends Phaser.Scene {
         this.mobSpawnTimer += delta;
         if (this.mobSpawnTimer >= this.getSpawnInterval()) {
           this.mobSpawnTimer = 0;
-          const type = this.selectMobTypeBySpeed();
+          const type = this.selectMobTypeByDistance();
           this.spawnMob(type);
         }
       }
@@ -642,8 +648,6 @@ class GameScene extends Phaser.Scene {
 
   killPlayer(killerMob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     if (!this.character) return;
-    console.log("playing die animation for player")
-    console.log("Current animation playing == ", this.character.anims.currentAnim)
     this.character.play("die");
     this.scrollSpeed = 0;
     this.playerDied = true;
@@ -661,22 +665,70 @@ class GameScene extends Phaser.Scene {
       killerMob.setVelocityX(0);
     } else if (type === "bee") {
       killerMob.play("bee-fly");
-      // let it keep flying offscreen
     }
-
+    window.dispatchEvent(new CustomEvent("gameOver", { detail: { health: this.health } }));
   }
 
   getSpawnInterval(): number {
-    if (this.scrollSpeed < 200) return 3000;
-    if (this.scrollSpeed < 300) return 2500;
-    return 1800;
+    const baseInterval = 3000;  // starting interval in ms
+    const minInterval = 700;    // don't go lower than this
+    const decayRate = 0.008;    // controls how quickly it speeds up
+  
+    const interval = baseInterval * Math.exp(-decayRate * this.distance);
+    return Math.max(interval, minInterval);
   }
+  
 
-  selectMobTypeBySpeed(): "snail" | "bee" | "boar" {
-    // if (this.scrollSpeed < 200) return "snail";
-    // if (this.scrollSpeed < 300) return "bee";
-    return "boar";
+  selectMobTypeByDistance(): "snail" | "bee" | "boar" {
+    const r = Math.random() * 100;
+  
+    if (this.distance < 30) {
+      return "snail";
+    }
+  
+    if (this.distance < 60) {
+      // 70% snail, 30% bee
+      return r < 70 ? "snail" : "bee";
+    }
+  
+    if (this.distance < 100) {
+      // 50% snail, 50% bee
+      return r < 50 ? "snail" : "bee";
+    }
+  
+    if (this.distance < 130) {
+      // 20% snail, 80% bee
+      return r < 20 ? "snail" : "bee";
+    }
+  
+    if (this.distance < 180) {
+      // 30% boar, 10% snail, 60% bee
+      if (r < 30) return "boar";
+      if (r < 40) return "snail"; // 30–40 = 10%
+      return "bee";              // 40–100 = 60%
+    }
+  
+    if (this.distance < 220) {
+      // 50% boar, 20% snail, 30% bee
+      if (r < 50) return "boar";
+      if (r < 70) return "bee";   // 50–70 = 20%
+      return "snail";             // 70–100 = 30%
+    }
+  
+    if (this.distance < 250) {
+      // 70% boar, 20% bee, 10% snail
+      if (r < 70) return "boar";
+      if (r < 90) return "bee";   // 70–90 = 20%
+      return "snail";             // 90–100 = 10%
+    }
+  
+    // 300 and above
+    // 80% boar, 15% bee, 5% snail
+    if (r < 80) return "boar";
+    if (r < 95) return "bee";
+    return "snail";
   }
+  
 
   updateHealthBarGui(health: number) {
     if (!this.healthBar) return;

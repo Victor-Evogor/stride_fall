@@ -8,11 +8,16 @@ const Timer = () => {
     let interval = 0;
     if (isGamePlaying) {
       interval = setInterval(() => {
+        
         setScore((prevScore) => prevScore + 1);
+
       }, 1000);
     } else {
       clearInterval(interval);
     }
+    window.addEventListener("gameOver", ()=>{
+      clearInterval(interval);
+    })
 
     return () => {
       clearInterval(interval);

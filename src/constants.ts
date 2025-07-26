@@ -1,5 +1,5 @@
 export const MOB_SPEEDS = {
     "snail": 8,
-    "bee": 15,
-    "boar": 20
+    "bee": 30,
+    "boar": 50
 }

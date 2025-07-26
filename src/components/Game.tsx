@@ -10,8 +10,8 @@ const Game = () => {
 
 useEffect(()=>{
     (window as { REACT_CONTEXT?: AppContextType })
-          .REACT_CONTEXT = ctx
-  }, [ctx.isGamePlaying])
+          .REACT_CONTEXT = ctx;
+  }, [ctx])
 
   useEffect(() => {
 

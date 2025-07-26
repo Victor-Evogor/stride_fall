@@ -9,7 +9,9 @@ export interface AppContextType {
   isGamePlaying: boolean;
   setIsGamePlaying: Dispatch<SetStateAction<boolean>>;
   score:number;
-  setScore: Dispatch<SetStateAction<number>>
+  setScore: Dispatch<SetStateAction<number>>;
+  isPaused: boolean,
+  setIsPaused: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);

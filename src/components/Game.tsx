@@ -7,6 +7,7 @@ import { type AppContextType } from "../AppContext";
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const ctx = useAppContext();
+  const {setIsPaused, isGamePlaying} = ctx
 
 useEffect(()=>{
     (window as { REACT_CONTEXT?: AppContextType })
@@ -68,6 +69,8 @@ useEffect(()=>{
       setTimeout(handleResize, 100)
     );
 
+    
+
     return () => {
       clearTimeout(timeout);
       window.removeEventListener("resize", handleResize);
@@ -77,6 +80,28 @@ useEffect(()=>{
       }
     };
   }, []);
+
+  useEffect(()=>{
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.key === 'p' || event.key === 'P') && isGamePlaying) {
+          setIsPaused(prev => {
+            const nextPaused = !prev;
+            window.dispatchEvent(new CustomEvent("pauseGame", {
+              detail: { isPaused: nextPaused }
+            }));
+            return nextPaused;
+          });
+      }
+    };
+    
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+
+  }, [isGamePlaying])
 
   return (
     <div className="w-full h-full">

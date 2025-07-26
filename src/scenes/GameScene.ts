@@ -414,7 +414,7 @@ class GameScene extends Phaser.Scene {
     }
 
     this.platform = this.add
-      .rectangle(width / 2, this.groundHeight, width + 10, 16, 0x000000, 0)
+      .rectangle(width / 2, this.groundHeight, width * 3, 16, 0x000000, 0)
       .setOrigin(0.5, 0);
     this.physics.add.existing(this.platform, true);
     this.physics.add.collider(this.character, this.platform);
@@ -432,6 +432,15 @@ class GameScene extends Phaser.Scene {
         }
       }
     });
+
+    window.addEventListener("pauseGame", (event)=>{
+      console.log("recieved pause event", event);
+      if((event as CustomEvent).detail.isPaused){
+        this.scene.pause();
+      }else{
+        this.scene.resume();
+      }
+    } )
 
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
@@ -455,8 +464,10 @@ class GameScene extends Phaser.Scene {
 
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
-      if(reactCtx)
-      this.distance = reactCtx.score;
+      if(reactCtx){
+        this.distance = reactCtx.score;
+      }
+      
 
     if (body.velocity.y < -10 && !body.blocked.down && this.gameStarted && !this.playerDied) {
       this.character.play("jump-rise");
@@ -564,13 +575,13 @@ class GameScene extends Phaser.Scene {
 
   spawnMob(type: "snail" | "bee" | "boar") {
     if (!this.platform || !this.character) return;
-    const x = (this.sys.game.config.width as number) + 100;
+    const x = (this.sys.game.config.width as number) + 0;
     const groundY = this.groundHeight;
     let mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null = null;
 
     if (type === "snail") {
       mob = this.physics.add.sprite(x, groundY, "snail"); // or 'boar-brown'
-      mob.setOrigin(2, 1.2);
+      mob.setOrigin(0.5, 1);
       mob.play("snail-run");
       this.physics.add.collider(mob, this.platform);
       mob.play("snail-run");

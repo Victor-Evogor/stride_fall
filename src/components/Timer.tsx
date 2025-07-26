@@ -2,30 +2,33 @@ import { useEffect } from "react";
 import { useAppContext } from "../AppContext";
 
 const Timer = () => {
-  const { score, isGamePlaying, setScore } = useAppContext();
+  const { score, isGamePlaying, setScore, isPaused } = useAppContext();
 
   useEffect(() => {
-    let interval = 0;
-    if (isGamePlaying) {
-      interval = setInterval(() => {
-        
-        setScore((prevScore) => prevScore + 1);
+    let interval: number;
 
+    if (isGamePlaying && !isPaused) {
+      interval = window.setInterval(() => {
+        setScore((prevScore) => prevScore + 1);
       }, 1000);
-    } else {
-      clearInterval(interval);
     }
-    window.addEventListener("gameOver", ()=>{
+
+    const gameOverHandler = () => {
       clearInterval(interval);
-    })
+    };
+
+    window.addEventListener("gameOver", gameOverHandler);
 
     return () => {
       clearInterval(interval);
+      window.removeEventListener("gameOver", gameOverHandler);
     };
-  }, [isGamePlaying, setScore]);
+  }, [isGamePlaying, isPaused, setScore]);
 
   return (
-    <div className="absolute top-[30px] right-[50px] text-[#ba9158] text-4xl">
+    <div
+      className={`absolute top-[30px] right-[50px] text-[#ba9158] text-4xl ${isPaused ? "blink" : ""}`}
+    >
       {score}
     </div>
   );

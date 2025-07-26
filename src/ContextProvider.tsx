@@ -10,7 +10,7 @@ import { AppContext } from "./AppContext";
 const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const [isGamePlaying, setIsGamePlaying] = useState(false);
   const [score, setScore] = useState(0);
-  
+  const [isPaused, setIsPaused] = useState(false)
 
   return (
     <AppContext.Provider
@@ -18,7 +18,9 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
         isGamePlaying,
         setIsGamePlaying,
         score,
-        setScore
+        setScore,
+        isPaused,
+        setIsPaused
       }}
     >
       {children}

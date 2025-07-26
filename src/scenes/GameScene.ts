@@ -674,7 +674,6 @@ class GameScene extends Phaser.Scene {
     } else if (type === "boar") {
       const boarType = killerMob.getData("boarType");
       killerMob.play(`${boarType}-idle`);
-      killerMob.setVelocityX(0);
     } else if (type === "bee") {
       killerMob.play("bee-fly");
     }

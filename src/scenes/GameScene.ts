@@ -380,7 +380,7 @@ class GameScene extends Phaser.Scene {
       });
       this.anims.create({
         key: `${key}-idle`,
-        frames: this.anims.generateFrameNumbers(key, { start: 10, end: 13 }),
+        frames: this.anims.generateFrameNumbers(key, { start: 12, end: 15 }),
         frameRate: 2,
         repeat: -1,
       });
@@ -413,7 +413,7 @@ class GameScene extends Phaser.Scene {
     }
 
     this.platform = this.add
-      .rectangle(width / 2, this.groundHeight, width, 16, 0x000000, 0)
+      .rectangle(width / 2, this.groundHeight, width + 10, 16, 0x000000, 0)
       .setOrigin(0.5, 0);
     this.physics.add.existing(this.platform, true);
     this.physics.add.collider(this.character, this.platform);
@@ -440,7 +440,7 @@ class GameScene extends Phaser.Scene {
       this.gameStarted = true;
     }
 
-    // this.physics.world.createDebugGraphic();
+    // this.physics.world.createDebugGraphic(); // Uncomment this for debugging
   }
 
   update(_: number, delta: number) {
@@ -452,10 +452,10 @@ class GameScene extends Phaser.Scene {
 
     const body = this.character.body as Phaser.Physics.Arcade.Body;
 
-    if (body.velocity.y < -10 && !body.blocked.down && this.gameStarted) {
+    if (body.velocity.y < -10 && !body.blocked.down && this.gameStarted && !this.playerDied) {
       this.character.play("jump-rise");
-    } else if (body.velocity.y > 10 && !body.blocked.down && this.gameStarted) {
-      this.character.play("jump-fall", true);
+    } else if (body.velocity.y > 10 && !body.blocked.down && this.gameStarted && !this.playerDied) {
+      this.character.play("jump-fall");
     } else if (body.blocked.down && this.gameStarted && !this.playerDied) {
       // Only play walk or run when grounded and not already playing
       if (this.scrollSpeed > 250 && this.character.anims.getName() !== "run") {
@@ -493,11 +493,13 @@ class GameScene extends Phaser.Scene {
 
       // --- MOB MOVEMENT ---
       this.mobs = this.mobs.filter((mob) => {
-        if (!this.playerDied && !mob.getData("isKillerMob"))
+        if ((!this.playerDied && !mob.getData("isKillerMob")) || (mob.getData("type") == "bee" && this.playerDied && mob.getData("isKillerMob")))
           mob.x -=
             mob.getData("speed") * (delta / 1000) +
             this.scrollSpeed * (delta / 1000);
-        else if (mob.getData("isKillerMob")) mob.x -= 0;
+        else if (mob.getData("isKillerMob")){
+           mob.x -= 0;
+          }
         else mob.x -= mob.getData("speed") * (delta / 1000);
         if (mob.x < -100) {
           mob.destroy();
@@ -577,16 +579,19 @@ class GameScene extends Phaser.Scene {
       mob.play("bee-fly");
       mob.body.setAllowGravity(false);
       mob.setScale(1.5);
+      mob.setSize(19, 24)
+      mob.body.setOffset(22, 21)
       mob.setData("speed", MOB_SPEEDS.bee);
     } else if (type === "boar") {
       const boarColors = ["brownBoar", "blackBoar", "whiteBoar"];
       const selected = Phaser.Utils.Array.GetRandom(boarColors);
-      mob = this.physics.add.sprite(x, groundY, selected).setOrigin(0.5, 1);
+      mob = this.physics.add.sprite(x, groundY, selected).setOrigin(2, 1.2);
       this.physics.add.collider(mob, this.platform);
       mob.setData("boarType", selected);
       mob.play(`${selected}-run`);
       mob.setScale(2.5);
-      mob.body.setOffset(0, 2);
+      mob.setSize(30, 26)
+      mob.body.setOffset(6, 6);
       mob.setData("speed", MOB_SPEEDS.boar);
     }
 
@@ -603,56 +608,21 @@ class GameScene extends Phaser.Scene {
   }
 
   handleMobCollision(mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
-    const type = mob.getData("type");
+    // const type = mob.getData("type");
     if (!this.character || this.playerDied) return;
 
-    const body = this.character.body as Phaser.Physics.Arcade.Body;
-
-    // Always deduct health and update UI
-    const isJumping = !body.blocked.down;
-
-    if (type === "bee") {
-      if (isJumping) {
-        this.health--;
-        this.updateHealthBarGui(this.health); // ← Always update UI after health change
-
-        if (this.health <= 0) {
-          mob.setData("isKillerMob", true);
-          this.killPlayer(mob);
-          return;
-        }
-
-        mob.play("bee-die");
-        mob.setVelocityX(0);
-        mob.setGravityY(1000); // fall down
-        return;
-      }
-
-      // player is not jumping → bee missed
-      return;
-    }
-
-    // Not a bee (snail or boar)
     this.health--;
     this.updateHealthBarGui(this.health);
 
     if (this.health <= 0) {
+      this.playerDied = true;
       this.killPlayer(mob);
       mob.setData("isKillerMob", true);
       return;
     }
 
     // Mob death logic (only if player survived)
-    if (type === "snail") {
-      mob.play("snail-die");
-      mob.setVelocityX(0);
-      mob.disableBody(true, true);
-    } else if (type === "boar") {
-      const boarType = mob.getData("boarType");
-      mob.play(`${boarType}-die`);
-      mob.setVelocityX(0);
-      this.time.delayedCall(1000, () => mob.destroy());
-    }
+    mob.destroy()
 
     // Flash red
     this.character.setTint(0xff0000);
@@ -672,6 +642,8 @@ class GameScene extends Phaser.Scene {
 
   killPlayer(killerMob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     if (!this.character) return;
+    console.log("playing die animation for player")
+    console.log("Current animation playing == ", this.character.anims.currentAnim)
     this.character.play("die");
     this.scrollSpeed = 0;
     this.playerDied = true;
@@ -692,7 +664,6 @@ class GameScene extends Phaser.Scene {
       // let it keep flying offscreen
     }
 
-    // stop all background movement, etc.
   }
 
   getSpawnInterval(): number {
@@ -704,7 +675,7 @@ class GameScene extends Phaser.Scene {
   selectMobTypeBySpeed(): "snail" | "bee" | "boar" {
     // if (this.scrollSpeed < 200) return "snail";
     // if (this.scrollSpeed < 300) return "bee";
-    return "snail";
+    return "boar";
   }
 
   updateHealthBarGui(health: number) {

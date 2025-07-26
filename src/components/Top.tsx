@@ -12,7 +12,7 @@ const TopBar = () => {
                 }}
                 className="pixelify-sans-400 text-[#ba9158] text-5xl font-bold tracking-wider uppercase drop-shadow-lg"
             >
-                dungeon runner
+                Stride Fall
             </span>
             <img 
                 src={TopPattern} 

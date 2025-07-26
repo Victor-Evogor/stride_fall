@@ -3,3 +3,5 @@ export const MOB_SPEEDS = {
     "bee": 30,
     "boar": 50
 }
+
+export const COLUMNS_PER_ROW = 32;

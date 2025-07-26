@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { AppContextType } from "../AppContext";
-import { MOB_SPEEDS } from "../constants";
+import { MOB_SPEEDS, COLUMNS_PER_ROW } from "../constants";
 
 import damageBar from "../assets/UI/MinimumDamage/minimum_damage.png";
 
@@ -112,9 +112,9 @@ class GameScene extends Phaser.Scene {
     const TILE_SCALE = 4;
     const TILE_PIXEL = 16;
     const tileSize = TILE_PIXEL * TILE_SCALE;
-    this.groundHeight = height - tileSize * 4;
-    const COLUMNS_PER_ROW = 32;
-    const undergroundRows = 3;
+    this.groundHeight = height - tileSize * 3;
+    
+    const undergroundRows = 2;
 
     this.birds = [];
     this.birdSpawnTimer = 0;
@@ -126,11 +126,7 @@ class GameScene extends Phaser.Scene {
       .setDepth(4);
 
     const getRandomColumnIndex = () => {
-      const r = Math.random();
-      if (r < 0.85) return Phaser.Math.Between(0, 5);
-      else if (r < 0.9) return 7;
-      else if (r < 0.9998) return Phaser.Math.Between(8, 9);
-      else return Phaser.Math.Between(10, 13);
+      return Phaser.Math.Between(0, 1);
     };
 
     for (let x = 0; x < Math.ceil(width / tileSize) + 1; x++) {
@@ -140,25 +136,26 @@ class GameScene extends Phaser.Scene {
       const tileFrame = this.add
         .image(x * tileSize, this.groundHeight, "tiles", frame)
         .setOrigin(0)
-        .setScale(TILE_SCALE);
+        .setScale(TILE_SCALE)
+        .setData("typeOfTile", "soil");
 
       this.bgElements.push(tileFrame);
 
-      for (let y = 1; y <= undergroundRows; y++) {
-        const undergroundFrameIndex =
-          y === undergroundRows
-            ? (29 + y - 1) * COLUMNS_PER_ROW + Phaser.Math.Between(0, 1)
-            : (29 + y) * COLUMNS_PER_ROW + Phaser.Math.Between(0, 1);
+      for (let y = 0; y < undergroundRows; y++) {
+        const undergroundFrameIndex = (29 + y + 1) * COLUMNS_PER_ROW + colIndex;
 
         const undergroundTileFrame = this.add
           .image(
             x * tileSize,
-            this.groundHeight + y * tileSize,
+            this.groundHeight + (y+1) * tileSize,
             "tiles",
             undergroundFrameIndex
           )
           .setOrigin(0)
+          .setData("typeOfTile", `depth${y + 1}`)
           .setScale(TILE_SCALE);
+
+
 
         this.bgElements.push(undergroundTileFrame);
       }
@@ -505,6 +502,10 @@ class GameScene extends Phaser.Scene {
 
         if (obj.x + obj.displayWidth < 0) {
           obj.x += (this.sys.game.config.width as number) + obj.displayWidth;
+          if(obj.getData("typeOfTile")){
+            const typeOfTile = obj.getData("typeOfTile") as "soil" | "depth1" | "depth2";
+            obj.setFrame(this.getTileFrameByDistance(typeOfTile));
+          }
         }
       });
 
@@ -744,6 +745,36 @@ class GameScene extends Phaser.Scene {
   updateHealthBarGui(health: number) {
     if (!this.healthBar) return;
     this.healthBar.play(`health-${health}`);
+  }
+
+  getTileFrameByDistance(typeOfTile: "soil" | "depth1" | "depth2"){
+    let colIndex = 0
+    if (this.distance < 50){
+      colIndex = Phaser.Math.Between(0,1)
+    } else if( this.distance < 100){
+      colIndex = Phaser.Math.Between(2,3)
+    } else if(this.distance < 150){
+      colIndex = Phaser.Math.Between(4,5)
+    } else if(this.distance < 200){
+      colIndex = Phaser.Math.Between(6,7)
+    } else if(this.distance < 250){
+      colIndex = Phaser.Math.Between(8,9)
+    } else if(this.distance < 300){
+      colIndex = Phaser.Math.Between(10,11)
+    } else {
+      colIndex = Phaser.Math.Between(12,13);
+    }
+
+
+    if (typeOfTile === "soil"){
+      return 29 * COLUMNS_PER_ROW + colIndex;
+    } else if(typeOfTile === "depth1"){
+      return (29 + 1) * COLUMNS_PER_ROW + colIndex;
+    } else if(typeOfTile === "depth2"){
+      return (29 + 2) * COLUMNS_PER_ROW + colIndex;
+    } else {
+      throw new Error("Unknown type of tile: " + typeOfTile);
+    }
   }
 }
 

@@ -1,6 +1,5 @@
 import Game from "./components/Game"
 import Controls from "./components/Controls"
-import Footer from "./components/Footer"
 import TopBar from "./components/Top"
 import AppProvider from "./ContextProvider"
 import Timer from "./components/Timer"
@@ -15,7 +14,6 @@ function App() {
       <TopBar/>
       <Controls/>
       <Game/>
-      <Footer/>
       </AppProvider>
     </main>
   )

@@ -48,7 +48,8 @@ class GameScene extends Phaser.Scene {
   mobSpawnTimer: number = 0;
   health: number = 8;
   healthBar: Phaser.GameObjects.Sprite | null = null;
-  distance: number = 0
+  distance: number = 0;
+  hasPaintedNewShrub: boolean = false;
 
   constructor() {
     super("GameScene");
@@ -805,7 +806,12 @@ class GameScene extends Phaser.Scene {
     if (this.distance < 250){
       return colIndex;
     } else {
-      return colIndex+3
+      if(this.hasPaintedNewShrub || typeOfShrub === "shrub-start")
+      {
+        this.hasPaintedNewShrub = true
+        return colIndex+3
+      }
+      return colIndex
     }
   }
 }

@@ -12,7 +12,7 @@ import texturesSprite from "../assets/Textures-16.png";
 
 // shrubs and trees
 import shrubs from "../assets/Trees/shrubs.png";
-import greenTree from "../assets/Trees/two_green_tall_trees.png";
+import tree from "../assets/Trees/all.png";
 
 // bird
 import bird from "../assets/bird_fly.png";
@@ -60,9 +60,9 @@ class GameScene extends Phaser.Scene {
       frameWidth: 112,
       frameHeight: 256,
     });
-    this.load.spritesheet("greenTree", greenTree, {
+    this.load.spritesheet("tree", tree, {
       frameWidth: 112,
-      frameHeight: 366, // two trees
+      frameHeight: 366,
     });
     this.load.spritesheet("tiles", texturesSprite, {
       frameWidth: 16,
@@ -125,12 +125,8 @@ class GameScene extends Phaser.Scene {
       .setScale(3)
       .setDepth(4);
 
-    const getRandomColumnIndex = () => {
-      return Phaser.Math.Between(0, 1);
-    };
-
     for (let x = 0; x < Math.ceil(width / tileSize) + 1; x++) {
-      const colIndex = getRandomColumnIndex();
+      const colIndex = Phaser.Math.Between(0, 1);
       const frame = 29 * COLUMNS_PER_ROW + colIndex;
 
       const tileFrame = this.add
@@ -172,10 +168,11 @@ class GameScene extends Phaser.Scene {
         // Draw tree first → behind shrubs
         this.bgElements.push(
           this.add
-            .image(treeX, this.groundHeight, "greenTree", treeFrame)
+            .image(treeX, this.groundHeight, "tree", treeFrame)
             .setOrigin(0.5, 1)
             .setScale(1.2)
             .setDepth(0)
+            .setData("type", "tree")
         );
       }
 
@@ -188,6 +185,7 @@ class GameScene extends Phaser.Scene {
           .setOrigin(0, 1)
           .setScale(1.2)
           .setDepth(1)
+          .setData("type", "shrub-start")
       ); // shrubs on higher depth
 
       for (let i = 0; i < numMiddle; i++) {
@@ -197,6 +195,7 @@ class GameScene extends Phaser.Scene {
             .setOrigin(0, 1)
             .setScale(1.2)
             .setDepth(1)
+            .setData("type", "shrub-middle")
         );
       }
 
@@ -211,16 +210,18 @@ class GameScene extends Phaser.Scene {
           .setOrigin(0, 1)
           .setScale(1.2)
           .setDepth(1)
+          .setData("type", "shrub-end")
       );
 
       if (treeInFront) {
         // Draw tree last → in front of shrubs
         this.bgElements.push(
           this.add
-            .image(treeX, this.groundHeight, "greenTree", treeFrame)
+            .image(treeX, this.groundHeight, "tree", treeFrame)
             .setOrigin(0.5, 1)
             .setScale(1.2)
             .setDepth(2)
+            .setData("type", "tree")
         );
       }
     }
@@ -505,6 +506,15 @@ class GameScene extends Phaser.Scene {
           if(obj.getData("typeOfTile")){
             const typeOfTile = obj.getData("typeOfTile") as "soil" | "depth1" | "depth2";
             obj.setFrame(this.getTileFrameByDistance(typeOfTile));
+          } else if(obj.getData("type") === "tree"){
+            obj.setFrame(this.getTreeFrameByDistance());
+          }
+          else if(obj.getData("type") === "shrub-start"){
+            obj.setFrame(this.getShrubFrameByDistance("shrub-start"));
+          } else if(obj.getData("type") === "shrub-middle"){
+            obj.setFrame(this.getShrubFrameByDistance("shrub-middle"));
+          } else if(obj.getData("type") === "shrub-end"){
+            obj.setFrame(this.getShrubFrameByDistance("shrub-end"));
           }
         }
       });
@@ -603,7 +613,7 @@ class GameScene extends Phaser.Scene {
     } else if (type === "boar") {
       const boarColors = ["brownBoar", "blackBoar", "whiteBoar"];
       const selected = Phaser.Utils.Array.GetRandom(boarColors);
-      mob = this.physics.add.sprite(x, groundY, selected).setOrigin(2, 1.2);
+      mob = this.physics.add.sprite(x, groundY, selected).setOrigin(0.5, 1);
       this.physics.add.collider(mob, this.platform);
       mob.setData("boarType", selected);
       mob.play(`${selected}-run`);
@@ -773,6 +783,29 @@ class GameScene extends Phaser.Scene {
       return (29 + 2) * COLUMNS_PER_ROW + colIndex;
     } else {
       throw new Error("Unknown type of tile: " + typeOfTile);
+    }
+  }
+
+  getTreeFrameByDistance(){
+    if(this.distance < 50){
+      return Phaser.Math.Between(0,3);
+    } else if(this.distance < 100){
+      return Phaser.Math.Between(4,7);
+    } else if(this.distance < 300){
+      return Phaser.Math.Between(8,11);
+    } else if(this.distance < 400){
+      return Phaser.Math.Between(12,15);
+    } else {
+      return Phaser.Math.Between(16,19);
+    }
+  }
+
+  getShrubFrameByDistance(typeOfShrub: "shrub-start" | "shrub-middle" | "shrub-end"){
+    const colIndex = typeOfShrub === "shrub-start"? 0 : (typeOfShrub === "shrub-middle" ? 1 : 2);
+    if (this.distance < 250){
+      return colIndex;
+    } else {
+      return colIndex+3
     }
   }
 }

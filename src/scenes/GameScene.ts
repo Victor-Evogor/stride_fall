@@ -28,6 +28,9 @@ import bee from "../assets/Mob/small_bee/fly_hit_attack.png";
 // snail
 import snail from "../assets/Mob/Snail/all.png";
 
+import goldCoin from "../assets/collectibles/gold_coin.png";
+import emptyCoin from "../assets/coin_empty.png"
+
 class GameScene extends Phaser.Scene {
   character: Phaser.Physics.Arcade.Sprite | null = null;
   scrollSpeed: number = 100;
@@ -50,6 +53,10 @@ class GameScene extends Phaser.Scene {
   healthBar: Phaser.GameObjects.Sprite | null = null;
   distance: number = 0;
   hasPaintedNewShrub: boolean = false;
+  coins: number = 0;
+  coinSpawnTimer: number = 0;
+  coinsDisplayText: Phaser.GameObjects.Text | null = null;
+  armor = 0
 
   constructor() {
     super("GameScene");
@@ -101,6 +108,11 @@ class GameScene extends Phaser.Scene {
       frameWidth: 64,
       frameHeight: 16,
     });
+    this.load.spritesheet("goldCoin", goldCoin, {
+      frameWidth: 594,
+      frameHeight: 594,
+    });
+    this.load.image("emptyCoin", emptyCoin);
   }
 
   create() {
@@ -114,7 +126,7 @@ class GameScene extends Phaser.Scene {
     const TILE_PIXEL = 16;
     const tileSize = TILE_PIXEL * TILE_SCALE;
     this.groundHeight = height - tileSize * 3;
-    
+
     const undergroundRows = 2;
 
     this.birds = [];
@@ -125,6 +137,8 @@ class GameScene extends Phaser.Scene {
       .sprite(200, 50, "healthBar")
       .setScale(3)
       .setDepth(4);
+
+      
 
     for (let x = 0; x < Math.ceil(width / tileSize) + 1; x++) {
       const colIndex = Phaser.Math.Between(0, 1);
@@ -144,15 +158,13 @@ class GameScene extends Phaser.Scene {
         const undergroundTileFrame = this.add
           .image(
             x * tileSize,
-            this.groundHeight + (y+1) * tileSize,
+            this.groundHeight + (y + 1) * tileSize,
             "tiles",
             undergroundFrameIndex
           )
           .setOrigin(0)
           .setData("typeOfTile", `depth${y + 1}`)
           .setScale(TILE_SCALE);
-
-
 
         this.bgElements.push(undergroundTileFrame);
       }
@@ -339,7 +351,7 @@ class GameScene extends Phaser.Scene {
     });
     this.anims.create({
       key: "snail-idle",
-      frames: [{ key: "snail", frame: 40 }],
+      frames: [{ key: "snail", frame: 32 }],
       frameRate: 1,
       repeat: -1,
     });
@@ -398,6 +410,26 @@ class GameScene extends Phaser.Scene {
       });
     });
 
+    this.anims.create({
+      key: "coin-idle",
+      frames: this.anims.generateFrameNumbers("goldCoin", { start: 0, end: 9 }),
+      frameRate: 6,
+      repeat: -1,
+    });
+
+    this.add.sprite(130, 110, "emptyCoin")
+      .setScale(0.08)
+      .setDepth(4)
+      .setOrigin(0.5, 0.5)
+    
+      this.coinsDisplayText = this.add.text(155, 127, `x ${this.coins}`, {
+        fontFamily: 'Pixelify Sans',
+        fontSize: '2rem',
+        color: '#ba9158',
+        
+      }).setOrigin(0, 1)
+      .setDepth(5)
+
     this.character = this.physics.add
       .sprite(100, this.groundHeight, "onyxMaleCharacter")
       .setOrigin(0.5, 1)
@@ -432,14 +464,14 @@ class GameScene extends Phaser.Scene {
       }
     });
 
-    window.addEventListener("pauseGame", (event)=>{
+    window.addEventListener("pauseGame", (event) => {
       console.log("recieved pause event", event);
-      if((event as CustomEvent).detail.isPaused){
+      if ((event as CustomEvent).detail.isPaused) {
         this.scene.pause();
-      }else{
+      } else {
         this.scene.resume();
       }
-    } )
+    });
 
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
@@ -463,14 +495,23 @@ class GameScene extends Phaser.Scene {
 
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
-      if(reactCtx){
-        this.distance = reactCtx.score;
-      }
-      
+    if (reactCtx) {
+      this.distance = reactCtx.score;
+    }
 
-    if (body.velocity.y < -10 && !body.blocked.down && this.gameStarted && !this.playerDied) {
+    if (
+      body.velocity.y < -10 &&
+      !body.blocked.down &&
+      this.gameStarted &&
+      !this.playerDied
+    ) {
       this.character.play("jump-rise");
-    } else if (body.velocity.y > 10 && !body.blocked.down && this.gameStarted && !this.playerDied) {
+    } else if (
+      body.velocity.y > 10 &&
+      !body.blocked.down &&
+      this.gameStarted &&
+      !this.playerDied
+    ) {
       this.character.play("jump-fall");
     } else if (body.blocked.down && this.gameStarted && !this.playerDied) {
       // Only play walk or run when grounded and not already playing
@@ -504,17 +545,19 @@ class GameScene extends Phaser.Scene {
 
         if (obj.x + obj.displayWidth < 0) {
           obj.x += (this.sys.game.config.width as number) + obj.displayWidth;
-          if(obj.getData("typeOfTile")){
-            const typeOfTile = obj.getData("typeOfTile") as "soil" | "depth1" | "depth2";
+          if (obj.getData("typeOfTile")) {
+            const typeOfTile = obj.getData("typeOfTile") as
+              | "soil"
+              | "depth1"
+              | "depth2";
             obj.setFrame(this.getTileFrameByDistance(typeOfTile));
-          } else if(obj.getData("type") === "tree"){
+          } else if (obj.getData("type") === "tree") {
             obj.setFrame(this.getTreeFrameByDistance());
-          }
-          else if(obj.getData("type") === "shrub-start"){
+          } else if (obj.getData("type") === "shrub-start") {
             obj.setFrame(this.getShrubFrameByDistance("shrub-start"));
-          } else if(obj.getData("type") === "shrub-middle"){
+          } else if (obj.getData("type") === "shrub-middle") {
             obj.setFrame(this.getShrubFrameByDistance("shrub-middle"));
-          } else if(obj.getData("type") === "shrub-end"){
+          } else if (obj.getData("type") === "shrub-end") {
             obj.setFrame(this.getShrubFrameByDistance("shrub-end"));
           }
         }
@@ -522,14 +565,18 @@ class GameScene extends Phaser.Scene {
 
       // --- MOB MOVEMENT ---
       this.mobs = this.mobs.filter((mob) => {
-        if ((!this.playerDied && !mob.getData("isKillerMob")) || (mob.getData("type") == "bee" && this.playerDied && mob.getData("isKillerMob")))
+        if (
+          (!this.playerDied && !mob.getData("isKillerMob")) ||
+          (mob.getData("type") == "bee" &&
+            this.playerDied &&
+            mob.getData("isKillerMob"))
+        )
           mob.x -=
             mob.getData("speed") * (delta / 1000) +
             this.scrollSpeed * (delta / 1000);
-        else if (mob.getData("isKillerMob")){
-           mob.x -= 0;
-          }
-        else mob.x -= mob.getData("speed") * (delta / 1000);
+        else if (mob.getData("isKillerMob")) {
+          mob.x -= 0;
+        } else mob.x -= mob.getData("speed") * (delta / 1000);
         if (mob.x < -100) {
           mob.destroy();
           return false;
@@ -546,6 +593,21 @@ class GameScene extends Phaser.Scene {
           this.spawnMob(type);
         }
       }
+
+      // -- Collectible spawning --
+
+      if(!this.playerDied){
+        this.coinSpawnTimer += delta;
+        if(this.coinSpawnTimer >= this.getSpawnCollectibleInterval() && this.shouldSpawnCollectible()){
+          this.coinSpawnTimer = 0;
+          this.spawnColletible("coin")
+        }
+      }
+
+      // update coin balance
+
+      if(this.coinsDisplayText)
+      this.coinsDisplayText.setText(`x ${this.coins}`);
     }
 
     // update birds
@@ -608,8 +670,8 @@ class GameScene extends Phaser.Scene {
       mob.play("bee-fly");
       mob.body.setAllowGravity(false);
       mob.setScale(1.5);
-      mob.setSize(19, 24)
-      mob.body.setOffset(22, 21)
+      mob.setSize(19, 24);
+      mob.body.setOffset(22, 21);
       mob.setData("speed", MOB_SPEEDS.bee);
     } else if (type === "boar") {
       const boarColors = ["brownBoar", "blackBoar", "whiteBoar"];
@@ -619,7 +681,7 @@ class GameScene extends Phaser.Scene {
       mob.setData("boarType", selected);
       mob.play(`${selected}-run`);
       mob.setScale(2.5);
-      mob.setSize(30, 26)
+      mob.setSize(30, 26);
       mob.body.setOffset(6, 6);
       mob.setData("speed", MOB_SPEEDS.boar);
     }
@@ -629,7 +691,7 @@ class GameScene extends Phaser.Scene {
     // mob.setVelocityX(-(mob.getData("speed")));
     mob.setData("type", type);
     mob.setData("isKillerMob", false);
-    mob.setDepth(3);
+    mob.setDepth(4);
     this.mobs.push(mob);
     this.physics.add.overlap(this.character, mob, () =>
       this.handleMobCollision(mob)
@@ -651,7 +713,7 @@ class GameScene extends Phaser.Scene {
     }
 
     // Mob death logic (only if player survived)
-    mob.destroy()
+    mob.destroy();
 
     // Flash red
     this.character.setTint(0xff0000);
@@ -688,132 +750,207 @@ class GameScene extends Phaser.Scene {
     } else if (type === "bee") {
       killerMob.play("bee-fly");
     }
-    window.dispatchEvent(new CustomEvent("gameOver", { detail: { health: this.health } }));
+    window.dispatchEvent(
+      new CustomEvent("gameOver", { detail: { health: this.health } })
+    );
   }
 
   getSpawnInterval(): number {
-    const baseInterval = 3000;  // starting interval in ms
-    const minInterval = 700;    // don't go lower than this
-    const decayRate = 0.008;    // controls how quickly it speeds up
-  
+    const baseInterval = 3000; // starting interval in ms
+    const minInterval = 700; // don't go lower than this
+    const decayRate = 0.008; // controls how quickly it speeds up
+
     const interval = baseInterval * Math.exp(-decayRate * this.distance);
     return Math.max(interval, minInterval);
   }
-  
 
   selectMobTypeByDistance(): "snail" | "bee" | "boar" {
     const r = Math.random() * 100;
-  
+
     if (this.distance < 30) {
       return "snail";
     }
-  
+
     if (this.distance < 60) {
       // 70% snail, 30% bee
       return r < 70 ? "snail" : "bee";
     }
-  
+
     if (this.distance < 100) {
       // 50% snail, 50% bee
       return r < 50 ? "snail" : "bee";
     }
-  
+
     if (this.distance < 130) {
       // 20% snail, 80% bee
       return r < 20 ? "snail" : "bee";
     }
-  
+
     if (this.distance < 180) {
       // 30% boar, 10% snail, 60% bee
       if (r < 30) return "boar";
       if (r < 40) return "snail"; // 30–40 = 10%
-      return "bee";              // 40–100 = 60%
+      return "bee"; // 40–100 = 60%
     }
-  
+
     if (this.distance < 220) {
       // 50% boar, 20% snail, 30% bee
       if (r < 50) return "boar";
-      if (r < 70) return "bee";   // 50–70 = 20%
-      return "snail";             // 70–100 = 30%
+      if (r < 70) return "bee"; // 50–70 = 20%
+      return "snail"; // 70–100 = 30%
     }
-  
+
     if (this.distance < 250) {
       // 70% boar, 20% bee, 10% snail
       if (r < 70) return "boar";
-      if (r < 90) return "bee";   // 70–90 = 20%
-      return "snail";             // 90–100 = 10%
+      if (r < 90) return "bee"; // 70–90 = 20%
+      return "snail"; // 90–100 = 10%
     }
-  
+
     // 300 and above
     // 80% boar, 15% bee, 5% snail
     if (r < 80) return "boar";
     if (r < 95) return "bee";
     return "snail";
   }
-  
 
   updateHealthBarGui(health: number) {
     if (!this.healthBar) return;
     this.healthBar.play(`health-${health}`);
   }
 
-  getTileFrameByDistance(typeOfTile: "soil" | "depth1" | "depth2"){
-    let colIndex = 0
-    if (this.distance < 50){
-      colIndex = Phaser.Math.Between(0,1)
-    } else if( this.distance < 100){
-      colIndex = Phaser.Math.Between(2,3)
-    } else if(this.distance < 150){
-      colIndex = Phaser.Math.Between(4,5)
-    } else if(this.distance < 200){
-      colIndex = Phaser.Math.Between(6,7)
-    } else if(this.distance < 250){
-      colIndex = Phaser.Math.Between(8,9)
-    } else if(this.distance < 300){
-      colIndex = Phaser.Math.Between(10,11)
+  getTileFrameByDistance(typeOfTile: "soil" | "depth1" | "depth2") {
+    let colIndex = 0;
+    if (this.distance < 50) {
+      colIndex = Phaser.Math.Between(0, 1);
+    } else if (this.distance < 100) {
+      colIndex = Phaser.Math.Between(2, 3);
+    } else if (this.distance < 150) {
+      colIndex = Phaser.Math.Between(4, 5);
+    } else if (this.distance < 200) {
+      colIndex = Phaser.Math.Between(6, 7);
+    } else if (this.distance < 250) {
+      colIndex = Phaser.Math.Between(8, 9);
+    } else if (this.distance < 300) {
+      colIndex = Phaser.Math.Between(10, 11);
     } else {
-      colIndex = Phaser.Math.Between(12,13);
+      colIndex = Phaser.Math.Between(12, 13);
     }
 
-
-    if (typeOfTile === "soil"){
+    if (typeOfTile === "soil") {
       return 29 * COLUMNS_PER_ROW + colIndex;
-    } else if(typeOfTile === "depth1"){
+    } else if (typeOfTile === "depth1") {
       return (29 + 1) * COLUMNS_PER_ROW + colIndex;
-    } else if(typeOfTile === "depth2"){
+    } else if (typeOfTile === "depth2") {
       return (29 + 2) * COLUMNS_PER_ROW + colIndex;
     } else {
       throw new Error("Unknown type of tile: " + typeOfTile);
     }
   }
 
-  getTreeFrameByDistance(){
-    if(this.distance < 50){
-      return Phaser.Math.Between(0,3);
-    } else if(this.distance < 100){
-      return Phaser.Math.Between(4,7);
-    } else if(this.distance < 300){
-      return Phaser.Math.Between(8,11);
-    } else if(this.distance < 400){
-      return Phaser.Math.Between(12,15);
+  getTreeFrameByDistance() {
+    if (this.distance < 50) {
+      return Phaser.Math.Between(0, 3);
+    } else if (this.distance < 100) {
+      return Phaser.Math.Between(4, 7);
+    } else if (this.distance < 300) {
+      return Phaser.Math.Between(8, 11);
+    } else if (this.distance < 400) {
+      return Phaser.Math.Between(12, 15);
     } else {
-      return Phaser.Math.Between(16,19);
+      return Phaser.Math.Between(16, 19);
     }
   }
 
-  getShrubFrameByDistance(typeOfShrub: "shrub-start" | "shrub-middle" | "shrub-end"){
-    const colIndex = typeOfShrub === "shrub-start"? 0 : (typeOfShrub === "shrub-middle" ? 1 : 2);
-    if (this.distance < 250){
+  getShrubFrameByDistance(
+    typeOfShrub: "shrub-start" | "shrub-middle" | "shrub-end"
+  ) {
+    const colIndex =
+      typeOfShrub === "shrub-start"
+        ? 0
+        : typeOfShrub === "shrub-middle"
+        ? 1
+        : 2;
+    if (this.distance < 250) {
       return colIndex;
     } else {
-      if(this.hasPaintedNewShrub || typeOfShrub === "shrub-start")
-      {
-        this.hasPaintedNewShrub = true
-        return colIndex+3
+      if (this.hasPaintedNewShrub || typeOfShrub === "shrub-start") {
+        this.hasPaintedNewShrub = true;
+        return colIndex + 3;
       }
-      return colIndex
+      return colIndex;
     }
   }
+
+  spawnColletible(type: "coin" | "heart") {
+    if(!this.character) throw new Error("Character not found!");
+    const x = (this.sys.game.config.width as number) + 0;
+    const y = this.groundHeight -( Phaser.Math.Between(0, 1)?50: 140);
+    let collectible: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null =
+      null;
+
+    if (type === "coin") {
+      collectible = this.physics.add.sprite(x, y, "coin")
+      .setSize(563, 564)
+      .setScale(0.05)
+      .setOffset(64, 44)
+      ;
+      collectible.play("coin-idle")
+    }/*  else if(type === "heart"){
+
+    }  */else {
+      throw new Error("Collectible "+type+" not found!")
+    }
+    collectible.setDepth(3)
+    collectible.body.setAllowGravity(false)
+    this.bgElements.push(collectible)
+    this.physics.add.overlap(this.character, collectible, () =>
+      this.handleCollectibleCollision(collectible)
+    );
+  }
+
+
+  handleCollectibleCollision(collectible:Phaser.Types.Physics.Arcade.SpriteWithDynamicBody){
+    if (!this.character || this.playerDied) return;
+
+    if (collectible.texture.key === "goldCoin") {
+      this.coins++;
+      collectible.destroy();
+      this.spawnColletible("coin");
+      window.dispatchEvent(
+        new CustomEvent("collectibleCollected", { detail: { type: "coin" } })
+      );
+    } else if (collectible.texture.key === "heart") {
+      // Handle heart collectible
+      collectible.destroy();
+      this.health = Math.min(this.health + 1, 8);
+      this.updateHealthBarGui(this.health);
+      window.dispatchEvent(
+        new CustomEvent("collectibleCollected", { detail: { type: "heart" } })
+      );
+    }
+  }
+
+  getSpawnCollectibleInterval(): number {
+    const baseInterval = 5000; // Start slow
+    const minInterval = 2000; // Never go below this
+    const decayRate = 0.006;  // Lower = slower decay
+    const randomness = Phaser.Math.Between(-400, 400); // Add jitter
+  
+    const interval = baseInterval * Math.exp(-decayRate * this.distance);
+    const noisyInterval = Math.max(minInterval, interval + randomness);
+  
+    return noisyInterval;
+  }
+  
+
+  shouldSpawnCollectible(): boolean {
+    const baseChance = 0.04;
+    const chance = baseChance + (this.distance / 100000); // increase over time
+    return Math.random() < Math.min(chance, 0.3); // max 30% chance
+  }
+
+
 }
 
 export default GameScene;

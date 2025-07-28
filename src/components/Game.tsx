@@ -3,6 +3,7 @@ import Phaser from "phaser";
 import GameScene from "../scenes/GameScene";
 import { useAppContext } from "../AppContext";
 import { type AppContextType } from "../AppContext";
+import FontFaceObserver from 'fontfaceobserver';
 
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
@@ -63,7 +64,20 @@ useEffect(()=>{
       }
     };
 
-    const timeout = setTimeout(initGame, 100);
+    const font = new FontFaceObserver('Pixelify Sans');
+    let timeout: number
+
+
+      font.load().then(() => {
+        console.log("font loaded")
+        timeout = setTimeout(initGame, 100);
+        ;
+      }).catch(() => {
+        console.warn("Font failed to load, starting game anyway");
+        timeout = setTimeout(initGame, 100);
+        
+      });
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", () =>
       setTimeout(handleResize, 100)

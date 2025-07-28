@@ -8,8 +8,8 @@ const Controls = () => {
     if (isGamePlaying) return null; // Don't render controls when the game is playing
     const buttons = [
         { label: 'START', action: () => setIsGamePlaying(true) },
-        { label: 'SHOP', action: () => console.log('Stop button clicked') },
-        { label: 'RESET', action: () => console.log('Reset button clicked') }
+        { label: 'CUSTOMIZE', action: () => console.log('Stop button clicked') },
+        { label: 'INFO', action: () => console.log('Reset button clicked') }
     ]
 
     return (

@@ -1,11 +1,25 @@
 import Phaser from "phaser";
 import type { AppContextType } from "../AppContext";
-import { MOB_SPEEDS, COLUMNS_PER_ROW } from "../constants";
+import { MOB_SPEEDS, COLUMNS_PER_ROW, DEFAULT_CHARACTER } from "../constants";
 
 import damageBar from "../assets/UI/MinimumDamage/minimum_damage.png";
 
-// characters
+// -- characters --
+
+// skins
+// male
+import ivoryMaleCharacter from "../assets/character_assets/male/skin/ivory.png"
 import onyxMaleCharacter from "../assets/character_assets/male/skin/onyx.png";
+import bronzeMaleCharacter from "../assets/character_assets/male/skin/bronze.png"
+import sandstoneMaleCharacter from "../assets/character_assets/male/skin/sandstone.png"
+import umberMaleCharacter from "../assets/character_assets/male/skin/umber.png"
+
+// female
+import onyxFemaleCharacter from "../assets/character_assets/female/skin/onyx.png"
+import ivoryFemaleCharacter from "../assets/character_assets/female/skin/ivory.png"
+import bronzeFemaleCharacter from "../assets/character_assets/female/skin/bronze.png"
+import sandstoneFemaleCharacter from "../assets/character_assets/female/skin/sandstone.png"
+import umberFemaleCharacter from "../assets/character_assets/female/skin/umber.png"
 
 import skyBg from "../assets/background/sky.png";
 import texturesSprite from "../assets/Textures-16.png";
@@ -56,7 +70,8 @@ class GameScene extends Phaser.Scene {
   coins: number = 0;
   coinSpawnTimer: number = 0;
   coinsDisplayText: Phaser.GameObjects.Text | null = null;
-  armor = 0
+  armor = 0;
+  selectedCharacter = DEFAULT_CHARACTER;
 
   constructor() {
     super("GameScene");
@@ -76,10 +91,53 @@ class GameScene extends Phaser.Scene {
       frameWidth: 16,
       frameHeight: 16,
     });
-    this.load.spritesheet("onyxMaleCharacter", onyxMaleCharacter, {
+
+    // Load male characters
+    this.load.spritesheet("ivoryMaleCharacter", ivoryMaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-    });
+  });
+  this.load.spritesheet("onyxMaleCharacter", onyxMaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+  this.load.spritesheet("bronzeMaleCharacter", bronzeMaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+  this.load.spritesheet("sandstoneMaleCharacter", sandstoneMaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+  this.load.spritesheet("umberMaleCharacter", umberMaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+
+  // Load female characters
+  this.load.spritesheet("ivoryFemaleCharacter", ivoryFemaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+  this.load.spritesheet("onyxFemaleCharacter", onyxFemaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+  this.load.spritesheet("bronzeFemaleCharacter", bronzeFemaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+  this.load.spritesheet("sandstoneFemaleCharacter", sandstoneFemaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+  this.load.spritesheet("umberFemaleCharacter", umberFemaleCharacter, {
+      frameWidth: 80,
+      frameHeight: 64,
+  });
+
+
+
     this.load.spritesheet("bird", bird, {
       frameWidth: 16,
       frameHeight: 16,
@@ -240,9 +298,25 @@ class GameScene extends Phaser.Scene {
     }
 
     // --- Animations ---
+    
+
+    const characters = [
+      "ivoryMaleCharacter",
+      "onyxMaleCharacter",
+      "bronzeMaleCharacter",
+      "sandstoneMaleCharacter",
+      "umberMaleCharacter",
+      "ivoryFemaleCharacter",
+      "onyxFemaleCharacter",
+      "bronzeFemaleCharacter",
+      "sandstoneFemaleCharacter",
+      "umberFemaleCharacter",
+  ];
+
+  characters.forEach((character) => {
     this.anims.create({
-      key: "idle",
-      frames: this.anims.generateFrameNumbers("onyxMaleCharacter", {
+      key: `${character}-idle`,
+      frames: this.anims.generateFrameNumbers(character, {
         start: 0,
         end: 3,
       }),
@@ -251,8 +325,8 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "jump-rise",
-      frames: this.anims.generateFrameNumbers("onyxMaleCharacter", {
+      key: `${character}-jump-rise`,
+      frames: this.anims.generateFrameNumbers(character, {
         start: 30,
         end: 33,
       }),
@@ -261,8 +335,8 @@ class GameScene extends Phaser.Scene {
     });
 
     this.anims.create({
-      key: "jump-fall",
-      frames: this.anims.generateFrameNumbers("onyxMaleCharacter", {
+      key: `${character}-jump-fall`,
+      frames: this.anims.generateFrameNumbers(character, {
         start: 40,
         end: 43,
       }),
@@ -270,59 +344,62 @@ class GameScene extends Phaser.Scene {
       repeat: -1,
     });
 
-    // Walk (row 1)
-    this.anims.create({
-      key: "walk",
-      frames: this.anims.generateFrameNumbers("onyxMaleCharacter", {
-        start: 10,
-        end: 17,
-      }),
-      frameRate: 10,
-      repeat: -1,
-    });
 
-    // Run (row 2)
-    this.anims.create({
-      key: "run",
-      frames: this.anims.generateFrameNumbers("onyxMaleCharacter", {
-        start: 20,
-        end: 27,
-      }),
-      frameRate: 14,
-      repeat: -1,
-    });
+      // Walk animation
+      this.anims.create({
+          key: `${character}-walk`,
+          frames: this.anims.generateFrameNumbers(character, {
+              start: 10,
+              end: 17,
+          }),
+          frameRate: 10,
+          repeat: -1,
+      });
 
-    // Strike (row 5 → index 50 to 55)
-    this.anims.create({
-      key: "strike",
-      frames: this.anims.generateFrameNumbers("onyxMaleCharacter", {
-        start: 50,
-        end: 55,
-      }),
-      frameRate: 12,
-      repeat: 0, // play once
-    });
+      // Run animation
+      this.anims.create({
+          key: `${character}-run`,
+          frames: this.anims.generateFrameNumbers(character, {
+              start: 20,
+              end: 27,
+          }),
+          frameRate: 14,
+          repeat: -1,
+      });
 
-    // Die (row 6 → index 60 to 69)
-    this.anims.create({
-      key: "die",
-      frames: this.anims.generateFrameNumbers("onyxMaleCharacter", {
-        start: 60,
-        end: 69,
-      }),
-      frameRate: 10,
-      repeat: 0, // play once
-    });
+      // Strike animation
+      this.anims.create({
+          key: `${character}-strike`,
+          frames: this.anims.generateFrameNumbers(character, {
+              start: 50,
+              end: 55,
+          }),
+          frameRate: 12,
+          repeat: 0,
+      });
 
-    this.anims.create({
-      key: "bird-fly",
-      frames: this.anims.generateFrameNumbers("bird", {
-        start: 0,
-        end: 7,
-      }),
-      frameRate: 10,
-      repeat: -1,
-    });
+      // Die animation
+      this.anims.create({
+          key: `${character}-die`,
+          frames: this.anims.generateFrameNumbers(character, {
+              start: 60,
+              end: 69,
+          }),
+          frameRate: 10,
+          repeat: 0,
+      });
+  });
+
+  // Bird animation
+  this.anims.create({
+    key: "bird-fly",
+    frames: this.anims.generateFrameNumbers("bird", {
+      start: 0,
+      end: 7,
+    }),
+    frameRate: 10,
+    repeat: -1,
+  });
 
     // 🐌 Snail
     this.anims.create({
@@ -431,7 +508,7 @@ class GameScene extends Phaser.Scene {
       .setDepth(5)
 
     this.character = this.physics.add
-      .sprite(100, this.groundHeight, "onyxMaleCharacter")
+      .sprite(100, this.groundHeight, this.selectedCharacter)
       .setOrigin(0.5, 1)
       .setScale(2.5)
       .setFlipX(true)
@@ -441,7 +518,7 @@ class GameScene extends Phaser.Scene {
     if (this.character && this.character.body) {
       this.character.body.setSize(16, 43);
       this.character.body.setOffset(32, 20);
-      this.character.play("idle");
+      this.character.play(`${this.selectedCharacter}-idle`);
     }
 
     this.platform = this.add
@@ -477,7 +554,7 @@ class GameScene extends Phaser.Scene {
       .REACT_CONTEXT;
 
     if (reactCtx?.isGamePlaying && !this.gameStarted) {
-      this.character.play("walk");
+      this.character.play(`${this.selectedCharacter}-walk`);
       this.gameStarted = true;
     }
 
@@ -505,23 +582,23 @@ class GameScene extends Phaser.Scene {
       this.gameStarted &&
       !this.playerDied
     ) {
-      this.character.play("jump-rise");
+      this.character.play(`${this.selectedCharacter}-jump-rise`);
     } else if (
       body.velocity.y > 10 &&
       !body.blocked.down &&
       this.gameStarted &&
       !this.playerDied
     ) {
-      this.character.play("jump-fall");
+      this.character.play(`${this.selectedCharacter}-jump-fall`);
     } else if (body.blocked.down && this.gameStarted && !this.playerDied) {
       // Only play walk or run when grounded and not already playing
-      if (this.scrollSpeed > 250 && this.character.anims.getName() !== "run") {
-        this.character.play("run");
+      if (this.scrollSpeed > 250 && this.character.anims.getName() !== `${this.selectedCharacter}-run`) {
+        this.character.play(`${this.selectedCharacter}-run`);
       } else if (
         this.scrollSpeed <= 250 &&
-        this.character.anims.getName() !== "walk"
+        this.character.anims.getName() !== `${this.selectedCharacter}-walk`
       ) {
-        this.character.play("walk");
+        this.character.play(`${this.selectedCharacter}-walk`);
       }
     }
 
@@ -733,7 +810,7 @@ class GameScene extends Phaser.Scene {
 
   killPlayer(killerMob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     if (!this.character) return;
-    this.character.play("die");
+    this.character.play(`${this.selectedCharacter}-die`);
     this.scrollSpeed = 0;
     this.playerDied = true;
 

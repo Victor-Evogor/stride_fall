@@ -24,7 +24,7 @@ const MainMenu = () => {
                 buttons.map(({label, action}, index) => (
                     <button 
                         key={index}
-                        className="group relative w-20 h-8 sm:w-24 sm:h-10 active:scale-95 transform transition-all duration-150 cursor-pointer"
+                        className="group relative w-20 h-8 sm:w-24 sm:h-10 active:scale-95 transform transition-all duration-150"
                 style={{
                     backgroundImage: `url(${buttonBg})`,
                     backgroundSize: '100% 100%',

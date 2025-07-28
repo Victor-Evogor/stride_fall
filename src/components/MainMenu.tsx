@@ -8,8 +8,9 @@ const MainMenu = () => {
     if (isGameStarted) return null; // Don't render controls when the game is playing
     const buttons = [
         { label: 'START', action: () => setisGameStarted(true) },
-        { label: 'CUSTOMIZE', action: () => console.log('Stop button clicked') },
-        { label: 'INFO', action: () => console.log('Reset button clicked') }
+        { label: 'CHARACTER', action: () => console.log('Stop button clicked') },
+        { label: 'HOW TO PLAY', action: () => console.log('Reset button clicked') },
+        { label: 'CREDITS', action: () => console.log('Credits button clicked') }
     ]
 
     return (

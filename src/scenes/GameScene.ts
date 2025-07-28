@@ -553,7 +553,7 @@ class GameScene extends Phaser.Scene {
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
 
-    if (reactCtx?.isGamePlaying && !this.gameStarted) {
+    if (reactCtx?.isGameStarted && !this.gameStarted) {
       this.character.play(`${this.selectedCharacter}-walk`);
       this.gameStarted = true;
     }
@@ -565,7 +565,7 @@ class GameScene extends Phaser.Scene {
     if ((window as { REACT_CONTEXT?: AppContextType }).REACT_CONTEXT)
       this.gameStarted = (
         window as { REACT_CONTEXT?: AppContextType }
-      ).REACT_CONTEXT!.isGamePlaying;
+      ).REACT_CONTEXT!.isGameStarted;
     if (!this.character) return;
 
     const body = this.character.body as Phaser.Physics.Arcade.Body;

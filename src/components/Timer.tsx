@@ -2,12 +2,12 @@ import { useEffect } from "react";
 import { useAppContext } from "../AppContext";
 
 const Timer = () => {
-  const { score, isGamePlaying, setScore, isPaused } = useAppContext();
+  const { score, isGameStarted, setScore, isPaused } = useAppContext();
 
   useEffect(() => {
     let interval: number;
 
-    if (isGamePlaying && !isPaused) {
+    if (isGameStarted && !isPaused) {
       interval = window.setInterval(() => {
         setScore((prevScore) => prevScore + 1);
       }, 1000);
@@ -23,7 +23,7 @@ const Timer = () => {
       clearInterval(interval);
       window.removeEventListener("gameOver", gameOverHandler);
     };
-  }, [isGamePlaying, isPaused, setScore]);
+  }, [isGameStarted, isPaused, setScore]);
 
   return (
     <div

@@ -1,5 +1,5 @@
 import Game from "./components/Game"
-import Controls from "./components/Controls"
+import MainMenu from "./components/MainMenu"
 import TopBar from "./components/Top"
 import AppProvider from "./ContextProvider"
 import Timer from "./components/Timer"
@@ -12,7 +12,7 @@ function App() {
       <AppProvider>
         <Timer/>
       <TopBar/>
-      <Controls/>
+      <MainMenu/>
       <Game/>
       </AppProvider>
     </main>

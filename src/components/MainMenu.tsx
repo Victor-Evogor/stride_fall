@@ -3,11 +3,11 @@ import buttonHighlight from "../assets/UI/HighlightButton_60x23.png"
 import rectangeBg from "../assets/UI/RectangleBox_96x96.png"
 import { useAppContext } from "../AppContext"
 
-const Controls = () => {
-    const { isGamePlaying, setIsGamePlaying } = useAppContext()
-    if (isGamePlaying) return null; // Don't render controls when the game is playing
+const MainMenu = () => {
+    const { isGameStarted, setisGameStarted } = useAppContext()
+    if (isGameStarted) return null; // Don't render controls when the game is playing
     const buttons = [
-        { label: 'START', action: () => setIsGamePlaying(true) },
+        { label: 'START', action: () => setisGameStarted(true) },
         { label: 'CUSTOMIZE', action: () => console.log('Stop button clicked') },
         { label: 'INFO', action: () => console.log('Reset button clicked') }
     ]
@@ -52,4 +52,4 @@ const Controls = () => {
     )
 }
 
-export default Controls
+export default MainMenu

@@ -8,7 +8,7 @@ import FontFaceObserver from 'fontfaceobserver';
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const ctx = useAppContext();
-  const {setIsPaused, isGamePlaying} = ctx
+  const {setIsPaused, isGameStarted} = ctx
 
 useEffect(()=>{
     (window as { REACT_CONTEXT?: AppContextType })
@@ -97,7 +97,7 @@ useEffect(()=>{
 
   useEffect(()=>{
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.key === 'p' || event.key === 'P') && isGamePlaying) {
+      if ((event.key === 'p' || event.key === 'P') && isGameStarted) {
           setIsPaused(prev => {
             const nextPaused = !prev;
             window.dispatchEvent(new CustomEvent("pauseGame", {
@@ -115,7 +115,7 @@ useEffect(()=>{
       window.removeEventListener('keydown', handleKeyDown);
     };
 
-  }, [isGamePlaying])
+  }, [isGameStarted, setIsPaused])
 
   return (
     <div className="w-full h-full">

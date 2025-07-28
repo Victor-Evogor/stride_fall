@@ -6,8 +6,8 @@ import {
   } from "react";
 
 export interface AppContextType {
-  isGamePlaying: boolean;
-  setIsGamePlaying: Dispatch<SetStateAction<boolean>>;
+  isGameStarted: boolean;
+  setisGameStarted: Dispatch<SetStateAction<boolean>>;
   score:number;
   setScore: Dispatch<SetStateAction<number>>;
   isPaused: boolean,

@@ -3,6 +3,7 @@ import MainMenu from "./components/MainMenu"
 import TopBar from "./components/Top"
 import AppProvider from "./ContextProvider"
 import Timer from "./components/Timer"
+import PauseMenu from "./components/PauseMenu"
 
 function App() {
   
@@ -14,6 +15,7 @@ function App() {
       <TopBar/>
       <MainMenu/>
       <Game/>
+      <PauseMenu/>
       </AppProvider>
     </main>
   )

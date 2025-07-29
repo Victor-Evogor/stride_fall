@@ -4,10 +4,10 @@ import rectangeBg from "../assets/UI/RectangleBox_96x96.png"
 import { useAppContext } from "../AppContext"
 
 const MainMenu = () => {
-    const { isGameStarted, setisGameStarted } = useAppContext()
+    const { isGameStarted, setIsGameStarted } = useAppContext()
     if (isGameStarted) return null; // Don't render controls when the game is playing
     const buttons = [
-        { label: 'START', action: () => setisGameStarted(true) },
+        { label: 'START', action: () => setIsGameStarted(true) },
         { label: 'CHARACTER', action: () => console.log('Stop button clicked') },
         { label: 'HOW TO PLAY', action: () => console.log('Reset button clicked') },
         { label: 'CREDITS', action: () => console.log('Credits button clicked') }

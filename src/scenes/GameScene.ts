@@ -47,9 +47,9 @@ import emptyCoin from "../assets/coin_empty.png"
 
 class GameScene extends Phaser.Scene {
   character: Phaser.Physics.Arcade.Sprite | null = null;
-  scrollSpeed: number = 100;
   bgElements: Phaser.GameObjects.Image[] = [];
   gameStarted: boolean = false;
+  scrollSpeed: number = 0;
   birds: Phaser.GameObjects.Sprite[] = [];
   birdSpeed: number = 50;
   birdSpawnTimer: number = 0;
@@ -75,6 +75,22 @@ class GameScene extends Phaser.Scene {
 
   constructor() {
     super("GameScene");
+  }
+
+  init(){
+  this.scrollSpeed = 100;
+  this.playerDied = false;
+  this.mobs = [];
+  this.health = 8;
+  this.distance = 0;
+  this.hasPaintedNewShrub = false;
+  this.coins = 0;
+  this.coinSpawnTimer = 0;
+  this.birdSpawnTimer = 0;
+  this.nextBirdSpawnDelay = Phaser.Math.Between(1000, 3000); // spawn delay in ms
+  this.birds = []
+  this.mobSpawnTimer = 0;
+  this.elapsedTime = 0;
   }
 
   preload() {
@@ -541,14 +557,7 @@ class GameScene extends Phaser.Scene {
       }
     });
 
-    window.addEventListener("pauseGame", (event) => {
-      console.log("recieved pause event", event);
-      if ((event as CustomEvent).detail.isPaused) {
-        this.scene.pause();
-      } else {
-        this.scene.resume();
-      }
-    });
+    
 
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
@@ -557,6 +566,22 @@ class GameScene extends Phaser.Scene {
       this.character.play(`${this.selectedCharacter}-walk`);
       this.gameStarted = true;
     }
+
+    window.addEventListener("pauseGame", (event) => {
+      if ((event as CustomEvent).detail.isPaused) {
+        this.scene.pause();
+      } else {
+        this.scene.resume();
+      }
+    });
+
+    window.addEventListener("restartGame", () => {
+      this.scene.restart();
+    })
+
+    window.addEventListener("endGame", () => {
+      this.scene.restart();
+    })
 
     // this.physics.world.createDebugGraphic(); // Uncomment this for debugging
   }

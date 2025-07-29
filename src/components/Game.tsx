@@ -8,7 +8,7 @@ import FontFaceObserver from 'fontfaceobserver';
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const ctx = useAppContext();
-  const {setIsPaused, isGameStarted} = ctx
+  const {setIsPaused, isGameStarted, setScore, setIsGameStarted} = ctx
 
 useEffect(()=>{
     (window as { REACT_CONTEXT?: AppContextType })
@@ -55,15 +55,6 @@ useEffect(()=>{
       game = new Phaser.Game(config);
     };
 
-    const handleResize = () => {
-      if (game && gameContainerRef.current) {
-        const container = gameContainerRef.current;
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
-        game.scale.resize(containerWidth, containerHeight);
-      }
-    };
-
     const font = new FontFaceObserver('Pixelify Sans');
     let timeout: number
 
@@ -78,17 +69,19 @@ useEffect(()=>{
         
       });
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("orientationchange", () =>
-      setTimeout(handleResize, 100)
-    );
+    window.addEventListener("restartGame", () => {
+      setIsPaused(false)
+      setScore(0)
+    })
 
-    
+    window.addEventListener("endGame", () => {
+      setIsPaused(false)
+      setScore(0)
+      setIsGameStarted(false)
+    })
 
     return () => {
       clearTimeout(timeout);
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("orientationchange", handleResize);
       if (game) {
         game.destroy(true);
       }

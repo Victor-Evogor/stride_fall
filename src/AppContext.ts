@@ -7,7 +7,7 @@ import {
 
 export interface AppContextType {
   isGameStarted: boolean;
-  setisGameStarted: Dispatch<SetStateAction<boolean>>;
+  setIsGameStarted: Dispatch<SetStateAction<boolean>>;
   score:number;
   setScore: Dispatch<SetStateAction<number>>;
   isPaused: boolean,

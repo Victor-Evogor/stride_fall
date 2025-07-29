@@ -8,7 +8,7 @@ import { AppContext } from "./AppContext";
 
 
 const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
-  const [isGameStarted, setisGameStarted] = useState(false);
+  const [isGameStarted, setIsGameStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false)
 
@@ -16,7 +16,7 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
     <AppContext.Provider
       value={{
         isGameStarted,
-        setisGameStarted,
+        setIsGameStarted,
         score,
         setScore,
         isPaused,

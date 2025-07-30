@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import { AppContext } from "./AppContext";
+import { type GameConfigType } from "./gameConfig";
 
 
 const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
@@ -12,6 +13,23 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false)
   const [isGameOver, setIsGameOver] = useState(false);
+  const [gameConfig, setGameConfig] = useState<GameConfigType>({
+    armor: 0,
+    coins: 0,
+    highScore: 0,
+    ownedItems: [],
+    pet: null,
+    characterGender: "female",
+    selectedCharacter: "sandstoneFemaleCharacter",
+    clothing: {
+      hat: null,
+      topBottom: null,
+      shoes: null,
+    },
+    hand: null,
+    hair: null,
+    petAccessory: null,
+  })
 
   return (
     <AppContext.Provider
@@ -23,7 +41,9 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
         isPaused,
         setIsPaused,
         isGameOver,
-        setIsGameOver
+        setIsGameOver,
+        gameConfig,
+        setGameConfig
       }}
     >
       {children}

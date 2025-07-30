@@ -4,6 +4,7 @@ import {
     type Dispatch,
     type SetStateAction,
   } from "react";
+import { type GameConfigType } from "./gameConfig";
 
 export interface AppContextType {
   isGameStarted: boolean;
@@ -14,6 +15,8 @@ export interface AppContextType {
   setIsPaused: Dispatch<SetStateAction<boolean>>;
   isGameOver: boolean;
   setIsGameOver: Dispatch<SetStateAction<boolean>>;
+  gameConfig: GameConfigType;
+  setGameConfig: Dispatch<SetStateAction<GameConfigType>>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);

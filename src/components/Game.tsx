@@ -4,11 +4,12 @@ import GameScene from "../scenes/GameScene";
 import { useAppContext } from "../AppContext";
 import { type AppContextType } from "../AppContext";
 import FontFaceObserver from 'fontfaceobserver';
+import { loadGameConfig, saveGameConfig } from "../gameConfig"
 
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const ctx = useAppContext();
-  const {setIsPaused, isGameStarted, setScore, setIsGameStarted, setIsGameOver} = ctx
+  const {setIsPaused, isGameStarted, setScore, setIsGameStarted, setIsGameOver, setGameConfig} = ctx
   const gameInitializedRef = useRef(false); // 👈 Prevent double rendering in react devmode with use strict enabled
 
 useEffect(()=>{
@@ -21,6 +22,32 @@ useEffect(()=>{
     gameInitializedRef.current = true;
 
     let game: Phaser.Game | null = null;
+
+    loadGameConfig().then(gameConfig => {
+      if(gameConfig){
+        setGameConfig(gameConfig)
+      } else {
+        saveGameConfig({
+          armor: 0,
+          coins: 0,
+          highScore: 0,
+          ownedItems: [],
+          pet: null,
+          characterGender: "female",
+          selectedCharacter: "sandstoneFemaleCharacter",
+          clothing: {
+            hat: null,
+            topBottom: null,
+            shoes: null,
+          },
+          hand: null,
+          hair: null,
+          petAccessory: null,
+        })
+      }
+    })
+
+    
 
     const initGame = () => {
       if (!gameContainerRef.current) return;
@@ -97,6 +124,8 @@ useEffect(()=>{
       }
     };
   }, []);
+
+
 
   useEffect(()=>{
     const handleKeyDown = (event: KeyboardEvent) => {

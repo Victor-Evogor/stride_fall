@@ -1,3 +1,5 @@
+import { type MaleCharacters, type FemaleCharacters } from "./gameConfig";
+
 export const MOB_SPEEDS = {
     "snail": 8,
     "bee": 30,
@@ -6,4 +8,4 @@ export const MOB_SPEEDS = {
 
 export const COLUMNS_PER_ROW = 32;
 
-export const DEFAULT_CHARACTER = "onyxFemaleCharacter";
+export const DEFAULT_CHARACTER: MaleCharacters | FemaleCharacters = "sandstoneFemaleCharacter";

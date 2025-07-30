@@ -26,3 +26,4 @@ llm_context.txt
 attributions.txt
 tui_context_builder.py
 character_assets.txt
+.env

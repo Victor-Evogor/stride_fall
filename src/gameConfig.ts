@@ -1,11 +1,14 @@
-type MaleCharacters =
+import { z } from 'zod';
+import { encryptObject, decryptObject } from './cryptoUtils';
+
+export type MaleCharacters =
   | "ivoryMaleCharacter"
   | "onyxMaleCharacter"
   | "bronzeMaleCharacter"
   | "sandstoneMaleCharacter"
   | "umberMaleCharacter";
 
-type FemaleCharacters =
+export type FemaleCharacters =
   | "ivoryFemaleCharacter"
   | "onyxFemaleCharacter"
   | "bronzeFemaleCharacter"
@@ -19,7 +22,7 @@ type MaleTopClothings =
   | "purple_shirt_2"
   | "shirt_2"
   | "shirt"
-  | "topless";
+  | null;
 
 type MaleBottomClothings =
   | "blue_pants"
@@ -32,9 +35,9 @@ type MaleBottomClothings =
   | "purple_underwear"
   | "skyblue_underwear"
   | "light_blue_underwear"
-  | "default_underwear";
+  | null;
 
-type MaleShoes = "boots" | "shoes" | "barefoot";
+type MaleShoes = "boots" | "shoes" | null;
 
 type MaleHats =
   | "farming_hat"
@@ -59,7 +62,7 @@ type MaleHats =
   | "santa_hat"
   | "viking_helmet"
   | "viking_helmet_with_horns"
-  | "none";
+  | null;
 
 type MaleHandItems =
   | "bronze_axe"
@@ -80,9 +83,9 @@ type MaleHandItems =
   | "stick"
   | "farming_hoe"
   | "sword"
-  | "barehands";
+  | null;
 
-type MaleHairs = "black" | "blond" | "brown" | "golden" | "red" | "none";
+type MaleHairs = "black" | "blond" | "brown" | "golden" | "red" | null;
 
 type FemaleTopAndBottomClothing =
   | "blue_panties_and_bra"
@@ -101,7 +104,7 @@ type FemaleTopAndBottomClothing =
   | "orange_corset2"
   | "purple_corset"
   | "purple_corset2"
-  | "default";
+  | null;
 
 type FemaleFootwear =
   | "boots"
@@ -111,11 +114,11 @@ type FemaleFootwear =
   | "red_socks"
   | "skyblue_socks"
   | "silverblue_socks"
-  | "none";
+  | null;
 
-type FemaleBottomClothings = "skirt" | "none";
+type FemaleBottomClothings = "skirt" | null;
 
-type FemaleHair = "black" | "blond" | "brown" | "golden" | "red" | "none";
+type FemaleHair = "black" | "blond" | "brown" | "golden" | "red" | null;
 
 type FemaleHandItems =
   | "basket"
@@ -138,7 +141,7 @@ type FemaleHandItems =
   | "wooden_axe"
   | "wooden_pickaxe"
   | "wooden_sword"
-  | "none";
+  | null;
 
 
 
@@ -148,10 +151,12 @@ type Pets =
   | "nova"
   | "rusty"
   | "maple"
+  | null
 
-type PetAccessories = 
+type PetAccessory = 
   | "dog_backpack"
   | "dog_hat"
+  | null
 
 interface GeneralConfig {
   coins: number;
@@ -165,14 +170,14 @@ interface GeneralConfig {
     | MaleHairs
     | FemaleBottomClothings
     | FemaleHair
-    | PetAccessories
+    | PetAccessory
     | Pets
   )[];
   pet: Pets | null;
-  petAccessories: PetAccessories | null;
+  petAccessory: PetAccessory | null;
 }
 
-type GameConfigType =
+export type GameConfigType =
   | ({
       characterGender: "male";
       selectedCharacter: MaleCharacters;
@@ -197,11 +202,85 @@ type GameConfigType =
       hair: FemaleHair;
     } & GeneralConfig);
 
-export const loadGameConfig = () => {
-  const config = JSON.parse(window.localStorage.getItem("STRIDE_FALL_GAME_CONFIG") ?? "{}");
-  return config as GameConfigType;
-};
 
-export const saveGameConfig = (config: GameConfigType) => {
-  window.localStorage.setItem("STRIDE_FALL_GAME_CONFIG", JSON.stringify(config));
-};
+    export const GameConfigSchema = z.discriminatedUnion('characterGender', [
+      z.object({
+        characterGender: z.literal("male"),
+        selectedCharacter: z.enum([
+          "ivoryMaleCharacter",
+          "onyxMaleCharacter",
+          "bronzeMaleCharacter",
+          "sandstoneMaleCharacter",
+          "umberMaleCharacter",
+        ]),
+        clothing: z.object({
+          hat: z.string().nullable(),
+          top: z.string().nullable(),
+          bottom: z.string().nullable(),
+          shoes: z.string().nullable(),
+        }),
+        hand: z.string().nullable(),
+        hair: z.string().nullable(),
+        coins: z.number(),
+        highScore: z.number(),
+        armor: z.number(),
+        ownedItems: z.array(z.string().nullable()),
+        pet: z.string().nullable(),
+        petAccessory: z.string().nullable(),
+      }),
+      z.object({
+        characterGender: z.literal("female"),
+        selectedCharacter: z.enum([
+          "ivoryFemaleCharacter",
+          "onyxFemaleCharacter",
+          "bronzeFemaleCharacter",
+          "sandstoneFemaleCharacter",
+          "umberFemaleCharacter",
+        ]),
+        clothing: z.object({
+          hat: z.string().nullable(),
+          topBottom: z.string().nullable(),
+          shoes: z.string().nullable(),
+        }),
+        hand: z.string().nullable(),
+        hair: z.string().nullable(),
+        coins: z.number(),
+        highScore: z.number(),
+        armor: z.number(),
+        ownedItems: z.array(z.string().nullable()),
+        pet: z.string().nullable(),
+        petAccessory: z.string().nullable(),
+      }),
+    ]);
+
+
+    export const loadGameConfig = async (): Promise<GameConfigType | null> => {
+      const raw = window.localStorage.getItem("STRIDE_FALL_GAME_CONFIG");
+      if (!raw) return null;
+    
+      let parsed;
+      try {
+        parsed = await decryptObject(raw);
+      } catch (e) {
+        console.error("Decryption or JSON parsing failed", e);
+        window.localStorage.removeItem("STRIDE_FALL_GAME_CONFIG");
+        return null;
+      }
+    
+      const result = GameConfigSchema.safeParse(parsed);
+    
+      if (!result.success) {
+        console.error(result.error);
+        console.error("Game config validation failed");
+        window.localStorage.removeItem("STRIDE_FALL_GAME_CONFIG");
+        return null;
+      }
+    
+      return result.data as GameConfigType;
+    };
+    
+    export const saveGameConfig = async (config: GameConfigType) => {
+      const encrypted = await encryptObject(config);
+      window.localStorage.setItem("STRIDE_FALL_GAME_CONFIG", encrypted);
+    };
+    

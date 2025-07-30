@@ -793,10 +793,15 @@ class GameScene extends Phaser.Scene {
     // mob.setVelocityX(-(mob.getData("speed")));
     mob.setData("type", type);
     mob.setData("isKillerMob", false);
-    mob.setDepth(4);
+    mob.setDepth(4)
+    .setAlpha(1).setVisible(true)
+    ;
     this.mobs.push(mob);
     this.physics.add.overlap(this.character, mob, () =>
+    {
       this.handleMobCollision(mob)
+
+    }
     );
   }
 
@@ -815,6 +820,7 @@ class GameScene extends Phaser.Scene {
     }
 
     // Mob death logic (only if player survived)
+    mob.body.enable = false;
     mob.destroy();
 
     // Flash red
@@ -852,9 +858,11 @@ class GameScene extends Phaser.Scene {
     } else if (type === "bee") {
       killerMob.play("bee-fly");
     }
-    window.dispatchEvent(
-      new CustomEvent("gameOver", { detail: { health: this.health } })
-    );
+    setTimeout(()=>{
+      window.dispatchEvent(
+        new CustomEvent("gameOver", { detail: { health: this.health } })
+      );
+    }, 3_000)
   }
 
   getSpawnInterval(): number {

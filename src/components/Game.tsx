@@ -8,7 +8,8 @@ import FontFaceObserver from 'fontfaceobserver';
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const ctx = useAppContext();
-  const {setIsPaused, isGameStarted, setScore, setIsGameStarted} = ctx
+  const {setIsPaused, isGameStarted, setScore, setIsGameStarted, setIsGameOver} = ctx
+  const gameInitializedRef = useRef(false); // 👈 Prevent double rendering in react devmode with use strict enabled
 
 useEffect(()=>{
     (window as { REACT_CONTEXT?: AppContextType })
@@ -16,6 +17,8 @@ useEffect(()=>{
   }, [ctx])
 
   useEffect(() => {
+    if (gameInitializedRef.current) return; // 👈 prevent reinitialization
+    gameInitializedRef.current = true;
 
     let game: Phaser.Game | null = null;
 
@@ -72,12 +75,19 @@ useEffect(()=>{
     window.addEventListener("restartGame", () => {
       setIsPaused(false)
       setScore(0)
+      setIsGameOver(false)
     })
 
     window.addEventListener("endGame", () => {
       setIsPaused(false)
       setScore(0)
       setIsGameStarted(false)
+      setIsGameOver(false)
+    })
+
+    window.addEventListener("gameOver", () => {
+      setIsPaused(true);
+      setIsGameOver(true);
     })
 
     return () => {

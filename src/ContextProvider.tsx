@@ -11,6 +11,7 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false)
+  const [isGameOver, setIsGameOver] = useState(false);
 
   return (
     <AppContext.Provider
@@ -20,7 +21,9 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
         score,
         setScore,
         isPaused,
-        setIsPaused
+        setIsPaused,
+        isGameOver,
+        setIsGameOver
       }}
     >
       {children}

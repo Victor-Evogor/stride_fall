@@ -6,4 +6,4 @@ export const MOB_SPEEDS = {
 
 export const COLUMNS_PER_ROW = 32;
 
-export const DEFAULT_CHARACTER = "ivoryMaleCharacter"
+export const DEFAULT_CHARACTER = "onyxFemaleCharacter";

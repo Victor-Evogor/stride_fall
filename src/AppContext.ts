@@ -12,6 +12,8 @@ export interface AppContextType {
   setScore: Dispatch<SetStateAction<number>>;
   isPaused: boolean,
   setIsPaused: Dispatch<SetStateAction<boolean>>;
+  isGameOver: boolean;
+  setIsGameOver: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);

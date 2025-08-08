@@ -110,7 +110,6 @@ export class CharacterCustomizationScene extends Phaser.Scene{
 
   create(){
 
-    console.log("Adding image")
   
     this.character = this.add.sprite(32, -25, DEFAULT_CHARACTER, 0);
     this.characters.forEach((character) => {
@@ -131,7 +130,20 @@ export class CharacterCustomizationScene extends Phaser.Scene{
     
     
     this.character.setOrigin(0.5, 0);
+
+
+    const handleGenderChanged = () => {
+
+    }
+
+    window.addEventListener("genderChanged",handleGenderChanged)
+
+    this.events.once("shutdown", ()=> {
+      window.removeEventListener("genderChanged",handleGenderChanged)
+    })
   }
+
+
 
 
 }

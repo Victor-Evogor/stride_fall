@@ -152,10 +152,17 @@ const CharacterMenu = () => {
 
   const handleGenderToggle = (gender: 'male' | 'female') => {
     if (gender !== characterGender) {
-      setGameConfig(prev => ({
+      setGameConfig(prev => { 
+        window.dispatchEvent(new CustomEvent("genderChanged", {detail: {
+          gender
+        }}));
+        
+        return ({
         ...prev,
-        characterGender: gender
-      }));
+        characterGender:  gender
+      });
+    
+    });
     }
   };
 

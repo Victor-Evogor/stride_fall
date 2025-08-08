@@ -567,21 +567,34 @@ class GameScene extends Phaser.Scene {
       this.gameStarted = true;
     }
 
-    window.addEventListener("pauseGame", (event) => {
+    const pauseGameEventHandler: EventListenerOrEventListenerObject = (event) => {
       if ((event as CustomEvent).detail.isPaused) {
         this.scene.pause();
       } else {
         this.scene.resume();
       }
-    });
+    }
 
-    window.addEventListener("restartGame", () => {
+    const restartGameEventHandler = () => {
       this.scene.restart();
-    })
+    }
 
-    window.addEventListener("endGame", () => {
+    const endGameEventHandler = () => {
       this.scene.restart();
-    })
+    }
+
+    window.addEventListener("pauseGame", pauseGameEventHandler);
+
+    window.addEventListener("restartGame", restartGameEventHandler)
+
+    window.addEventListener("endGame", endGameEventHandler)
+
+    this.events.once('shutdown', () => {
+    window.removeEventListener('pauseGame', pauseGameEventHandler);
+    window.removeEventListener("restartGame", restartGameEventHandler)
+    window.removeEventListener("endGame", endGameEventHandler)
+  });
+
 
     // this.physics.world.createDebugGraphic(); // Uncomment this for debugging
   }

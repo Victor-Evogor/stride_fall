@@ -99,41 +99,50 @@ useEffect(()=>{
         
       });
 
-    window.addEventListener("restartGame", () => {
-      setIsPaused(false)
-      setScore(0)
-      setIsGameOver(false)
-    })
+      const handleRestartGame = () => {
+        setIsPaused(false)
+        setScore(0)
+        setIsGameOver(false)
+      }
 
-    window.addEventListener("endGame", () => {
-      setIsPaused(false)
-      setScore(0)
-      setIsGameStarted(false)
-      setIsGameOver(false)
-    })
+      const handleEndGame = () => {
+        setIsPaused(false)
+        setScore(0)
+        setIsGameStarted(false)
+        setIsGameOver(false)
+      }
 
-    window.addEventListener("gameOver", (gameDetails ) => {
-      setGameConfig(prev => {
-        saveGameConfig({
-          ...prev,
-          coins: prev.coins + (gameDetails as CustomEvent).detail.coinsCollected,
-          highScore: Math.max(prev.highScore, (gameDetails as CustomEvent).detail.score),
-        });
-        return {
-          ...prev,
-          coins: prev.coins + (gameDetails as CustomEvent).detail.coinsCollected,
-          highScore: Math.max(prev.highScore, (gameDetails as CustomEvent).detail.score),
-        }
-      })
-      setIsPaused(true);
-      setIsGameOver(true);
-    })
+      const handleGameOver: EventListenerOrEventListenerObject = (gameDetails ) => {
+        setGameConfig(prev => {
+          saveGameConfig({
+            ...prev,
+            coins: prev.coins + (gameDetails as CustomEvent).detail.coinsCollected,
+            highScore: Math.max(prev.highScore, (gameDetails as CustomEvent).detail.score),
+          });
+          return {
+            ...prev,
+            coins: prev.coins + (gameDetails as CustomEvent).detail.coinsCollected,
+            highScore: Math.max(prev.highScore, (gameDetails as CustomEvent).detail.score),
+          }
+        })
+        setIsPaused(true);
+        setIsGameOver(true);
+      }
+
+    window.addEventListener("restartGame", handleRestartGame)
+
+    window.addEventListener("endGame", handleEndGame)
+
+    window.addEventListener("gameOver", handleGameOver)
 
     return () => {
       clearTimeout(timeout);
       if (game) {
         game.destroy(true);
       }
+      window.removeEventListener("restartGame", handleRestartGame)
+      window.removeEventListener("endGame", handleEndGame)
+      window.removeEventListener("gameOver", handleGameOver)
     };
   }, []);
 

@@ -33,6 +33,8 @@ import dogHat from "../assets/pet_companion/dog_hat.png";
 
 import { DEFAULT_CHARACTER } from "../constants"
 
+import assets from "../assetMap"
+
 
 
 export class PetCustomizationScene extends Phaser.Scene{
@@ -110,7 +112,7 @@ export class CharacterCustomizationScene extends Phaser.Scene{
 
     console.log("Adding image")
   
-    this.character = this.add.sprite(32, -16, DEFAULT_CHARACTER, 0);
+    this.character = this.add.sprite(32, -25, DEFAULT_CHARACTER, 0);
     this.characters.forEach((character) => {
       this.anims.create({
         key: `${character[0]}-idle`,
@@ -124,7 +126,7 @@ export class CharacterCustomizationScene extends Phaser.Scene{
     })
 
     this.character.play(`${this.selectedCharacter}-idle`);
-    this.character.setScale(1.3).setFlipX(true)
+    this.character.setScale(2.3).setFlipX(true)
     
     
     

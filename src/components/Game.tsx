@@ -9,7 +9,7 @@ import { loadGameConfig, saveGameConfig } from "../gameConfig"
 const Game = () => {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const ctx = useAppContext();
-  const {setIsPaused, isGameStarted, setScore, setIsGameStarted, setIsGameOver, setGameConfig} = ctx
+  const {setIsPaused, isGameStarted, setScore, setIsGameStarted, setIsGameOver, setGameConfig, gameConfig} = ctx
   const gameInitializedRef = useRef(false); // 👈 Prevent double rendering in react devmode with use strict enabled
 
 useEffect(()=>{
@@ -112,7 +112,19 @@ useEffect(()=>{
       setIsGameOver(false)
     })
 
-    window.addEventListener("gameOver", () => {
+    window.addEventListener("gameOver", (gameDetails ) => {
+      setGameConfig(prev => {
+        saveGameConfig({
+          ...prev,
+          coins: prev.coins + (gameDetails as CustomEvent).detail.coinsCollected,
+          highScore: Math.max(prev.highScore, (gameDetails as CustomEvent).detail.score),
+        });
+        return {
+          ...prev,
+          coins: prev.coins + (gameDetails as CustomEvent).detail.coinsCollected,
+          highScore: Math.max(prev.highScore, (gameDetails as CustomEvent).detail.score),
+        }
+      })
       setIsPaused(true);
       setIsGameOver(true);
     })

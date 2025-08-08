@@ -54,14 +54,14 @@ const ArrowButtons: FunctionComponent<PropsWithChildren> = ({children}) => {
       <img
         src={leftArrow}
         alt="Left Arrow"
-        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95"
+        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4"
         style={{ imageRendering: "pixelated" }}
       />
       {children}
       <img
         src={rightArrow}
         alt="Right Arrow"
-        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95"
+        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4"
         style={{ imageRendering: "pixelated" }}
       />
     </div>
@@ -136,13 +136,12 @@ const CharacterMenu = () => {
     const isScenesMountedRef = useRef<boolean>(false);
   const {
     setIsCharacterCustomizeMenuOpen,
-    gameConfig: { characterGender },
+    gameConfig: { characterGender, coins },
     setGameConfig,
   } = useAppContext();
 
   // You can get the coin amount from your game state/context
   // For now, I'll use a placeholder value - replace this with your actual coin state
-  const playerCoins = 2450; // Replace with actual coin amount from your game state
 
   const isMale = characterGender === "male";
   const isFemale = characterGender === "female";
@@ -250,7 +249,7 @@ const CharacterMenu = () => {
           }}
         >
           {/* Coin Display */}
-          <CoinDisplay coinAmount={playerCoins} />
+          <CoinDisplay coinAmount={coins} />
 
           {/* Gender Toggle Buttons */}
           <div className="flex justify-center gap-4 mb-2">
@@ -281,7 +280,7 @@ const CharacterMenu = () => {
                   backgroundRepeat: "no-repeat",
                   imageRendering: "pixelated",
                   width: "80px",
-                  height: "100px",
+                  height: "140px",
                 }}
               >
                 <div
@@ -339,6 +338,8 @@ const CharacterMenu = () => {
                     HATS
                   </span>
                 </div>
+                <ArrowButtons>
+
                 <div
                   className="relative mb-2"
                   style={{
@@ -350,6 +351,7 @@ const CharacterMenu = () => {
                     height: "64px",
                   }}
                 >
+
                   <img 
                     src={hats.get("Blue cap")?.icon} 
                     alt="Hat" 
@@ -359,7 +361,10 @@ const CharacterMenu = () => {
                       transform: "scale(1.6)",
                     }}
                   />
+
                 </div>
+                </ArrowButtons >
+
                 {/* Price Button - only show if not owned */}
                 {!hats.get("Blue cap")?.owned && (
                   <div
@@ -381,7 +386,6 @@ const CharacterMenu = () => {
                     </span>
                   </div>
                 )}
-                <ArrowButtons />
               </div>
 
               {isMale && (

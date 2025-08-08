@@ -860,7 +860,7 @@ class GameScene extends Phaser.Scene {
     }
     setTimeout(()=>{
       window.dispatchEvent(
-        new CustomEvent("gameOver", { detail: { health: this.health } })
+        new CustomEvent("gameOver", { detail: { coinsCollected: this.coins, score: this.distance } })
       );
     }, 3_000)
   }

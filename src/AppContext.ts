@@ -17,6 +17,8 @@ export interface AppContextType {
   setIsGameOver: Dispatch<SetStateAction<boolean>>;
   gameConfig: GameConfigType;
   setGameConfig: Dispatch<SetStateAction<GameConfigType>>;
+  isCharacterCustomizeMenuOpen: boolean;
+  setIsCharacterCustomizeMenuOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);

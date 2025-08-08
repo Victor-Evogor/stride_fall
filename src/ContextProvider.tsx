@@ -13,6 +13,7 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false)
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isCharacterCustomizeMenuOpen, setIsCharacterCustomizeMenuOpen] = useState<boolean>(false)
   const [gameConfig, setGameConfig] = useState<GameConfigType>({
     armor: 0,
     coins: 0,
@@ -43,6 +44,8 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
         isGameOver,
         setIsGameOver,
         gameConfig,
+        isCharacterCustomizeMenuOpen,
+        setIsCharacterCustomizeMenuOpen,
         setGameConfig
       }}
     >

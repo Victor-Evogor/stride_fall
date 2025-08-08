@@ -62,7 +62,7 @@ useEffect(()=>{
         type: Phaser.AUTO,
         width: containerWidth,
         height: containerHeight,
-        parent: gameContainerRef.current,
+        parent: container,
         scene: GameScene,
         physics: {
           default: "arcade",

@@ -61,9 +61,8 @@ export class PetCustomizationScene extends Phaser.Scene{
   }
 
   create(){
-    console.log("Adding pet image")
     
-    const pet = this.add.sprite(32, -16, "luna", 0);
+    const pet = this.add.sprite(30, -16, "luna", 0);
     this.anims.create({
       key: "luna-idle",
       frames: this.anims.generateFrameNumbers("luna", {
@@ -74,13 +73,21 @@ export class PetCustomizationScene extends Phaser.Scene{
       repeat: -1,
     });
     pet.play("luna-idle");
-    pet.setScale(1.3);
+    pet.setScale(1.8);
     pet.setOrigin(0.5, 0);
+
+    const handleCustomizationAction: EventListenerOrEventListenerObject = (event) => {
+
+    }
+
+    this.events.once("destroy", ()=> {
+      window.removeEventListener("customizationAction",handleCustomizationAction)
+    })
   }
 }
 
 export class CharacterCustomizationScene extends Phaser.Scene{
-  character: Phaser.GameObjects.Sprite | null= null
+  character: Phaser.GameObjects.Sprite | null = null
   characters: [string, string][] = [
     ["ivoryMaleCharacter", ivoryMaleCharacter],
     ["onyxMaleCharacter", onyxMaleCharacter],
@@ -94,6 +101,8 @@ export class CharacterCustomizationScene extends Phaser.Scene{
     ["umberFemaleCharacter", umberFemaleCharacter],
   ];
   selectedCharacter: string = DEFAULT_CHARACTER
+
+  
   constructor(){
     super("CharacterCustomizationScene");
   }
@@ -132,14 +141,42 @@ export class CharacterCustomizationScene extends Phaser.Scene{
     this.character.setOrigin(0.5, 0);
 
 
-    const handleGenderChanged = () => {
-
+    const handleCustomizationAction: EventListenerOrEventListenerObject = (event) => {
+      if(!this.character){
+        console.error("Error: Character not initialized")
+        return
+      }
+      const action = (event as CustomEvent).detail.action
+      const payload = (event as CustomEvent).detail.payload
+      switch (action) {
+        case "genderChange":
+          { 
+            const newGender = payload.gender;
+            const characterColor = this.character.anims.getName().includes("Male")?this.character.anims.getName().split("Male")[0]: this.character.anims.getName().split("Female")[0]
+            if(newGender === "male"){
+              this.character.play(`${characterColor}MaleCharacter-idle`)
+            } else if(newGender == "female"){
+              this.character.play(`${characterColor}FemaleCharacter-idle`)
+            }
+          break; 
+        }
+      
+        case "changeCharacterColor":
+          {
+            const newColor = payload.currentCharacterColor;
+            const newCharacter = newColor + (this.character.anims.getName().includes("Male") ? "MaleCharacter-idle" : "FemaleCharacter-idle");
+            this.character.play(newCharacter)
+            break;
+          }
+        default:
+          break;
+      }
     }
 
-    window.addEventListener("genderChanged",handleGenderChanged)
+    window.addEventListener("customizationAction",handleCustomizationAction)
 
-    this.events.once("shutdown", ()=> {
-      window.removeEventListener("genderChanged",handleGenderChanged)
+    this.events.once("destroy", ()=> {
+      window.removeEventListener("customizationAction",handleCustomizationAction)
     })
   }
 

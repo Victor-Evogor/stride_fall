@@ -595,6 +595,12 @@ class GameScene extends Phaser.Scene {
     window.removeEventListener("endGame", endGameEventHandler)
   });
 
+  this.events.once("destroy", () => {
+    window.removeEventListener('pauseGame', pauseGameEventHandler);
+    window.removeEventListener("restartGame", restartGameEventHandler)
+    window.removeEventListener("endGame", endGameEventHandler)
+  })
+
 
     // this.physics.world.createDebugGraphic(); // Uncomment this for debugging
   }

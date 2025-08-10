@@ -8,9 +8,35 @@ import rightArrow from "../assets/UI/RightArrowButton_7x10.png";
 import cornerExitKnot from "../assets/UI/CornerKnot_14x14.png";
 import { PetCustomizationScene, CharacterCustomizationScene } from "../scenes/CharacterCustomizationScene";
 import { useAppContext } from "../AppContext";
-import { useRef, useEffect, type PropsWithChildren, type FunctionComponent } from "react"
+import { useRef, useState, useEffect, type PropsWithChildren, type FunctionComponent, type MouseEventHandler } from "react"
 import Phaser from "phaser"
 import {hats, femaleClothing, femaleHair, femaleHand, maleClothing, maleHair, maleHand, petCompanions} from "../assetMap"
+
+const PriceBox: FunctionComponent<{price: number, clickHandler: MouseEventHandler<HTMLDivElement>}> = ({price, clickHandler}) => {
+  return (
+    
+      <div
+        className="relative px-2 py-1 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
+        style={{
+          backgroundImage: `url(${priceBox})`,
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+          imageRendering: "pixelated",
+          minWidth: "52px",
+          height: "14px",
+        }}
+        onClick={clickHandler}
+      >
+        <span 
+          className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
+          style={{ textShadow: "1px 1px 0px #000" }}
+        >
+          {price}G
+        </span>
+      </div>
+   
+  )
+}
 
 const CoinDisplay: FunctionComponent<{
   coinAmount: number;
@@ -48,7 +74,10 @@ const CoinDisplay: FunctionComponent<{
   );
 };
 
-const ArrowButtons: FunctionComponent<PropsWithChildren> = ({children}) => {
+const ArrowButtons: FunctionComponent<PropsWithChildren<{
+  leftArrowClick?: MouseEventHandler<HTMLImageElement>,
+  rightArrowClick?: MouseEventHandler<HTMLImageElement>
+}>> = ({children, leftArrowClick, rightArrowClick}) => {
   return (
     <div className="flex items-center justify-center gap-2">
       <img
@@ -56,6 +85,7 @@ const ArrowButtons: FunctionComponent<PropsWithChildren> = ({children}) => {
         alt="Left Arrow"
         className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4"
         style={{ imageRendering: "pixelated" }}
+        onClick={leftArrowClick}
       />
       {children}
       <img
@@ -63,6 +93,7 @@ const ArrowButtons: FunctionComponent<PropsWithChildren> = ({children}) => {
         alt="Right Arrow"
         className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4"
         style={{ imageRendering: "pixelated" }}
+        onClick={rightArrowClick}
       />
     </div>
   );
@@ -124,7 +155,7 @@ const AcceptButton: FunctionComponent<{
         className="text-white text-sm font-bold leading-none flex items-center justify-center h-full"
         style={{ textShadow: "1px 1px 0px #000" }}
       >
-        ACCEPT
+        APPLY CHANGES
       </span>
     </div>
   );
@@ -134,37 +165,48 @@ const CharacterMenu = () => {
     const characterCustomizationRef = useRef<HTMLDivElement>(null);
     const petCustomizationRef = useRef<HTMLDivElement>(null);
     const isScenesMountedRef = useRef<boolean>(false);
+
+    const [characterSelectIndex, setCharacterSelectIndex] = useState(0)
+
+    const characterColors = [
+      "ivory",
+      "onyx",
+      "bronze",
+      "sandstone",
+      "umber"
+    ]
+
   const {
     setIsCharacterCustomizeMenuOpen,
     gameConfig: { characterGender, coins },
-    setGameConfig,
+    // setGameConfig,
   } = useAppContext();
+  const [myGender, setMyGender] = useState(characterGender)
 
-  // You can get the coin amount from your game state/context
-  // For now, I'll use a placeholder value - replace this with your actual coin state
-
-  const isMale = characterGender === "male";
-  const isFemale = characterGender === "female";
+  const isMale = myGender === "male";
+  const isFemale = myGender === "female";
 
   const closeCharacterMenu = () => {
     setIsCharacterCustomizeMenuOpen(false);
   };
 
   const handleGenderToggle = (gender: 'male' | 'female') => {
-    if (gender !== characterGender) {
-      setGameConfig(prev => { 
-        window.dispatchEvent(new CustomEvent("genderChanged", {detail: {
-          gender
+    if (gender !== myGender) {
+      setMyGender(() => { 
+        window.dispatchEvent(new CustomEvent("customizationAction", {detail: {
+          action: "genderChange",
+          payload: {
+            gender
+          }
         }}));
         
-        return ({
-        ...prev,
-        characterGender:  gender
-      });
+        return gender;
     
     });
     }
   };
+
+
 
   const handleAcceptChanges = () => {
     // Here you can add any logic to save/apply the customization changes
@@ -172,6 +214,51 @@ const CharacterMenu = () => {
     // For now, just close the menu
     closeCharacterMenu();
   };
+
+  const handleCharacterSpriteLeftArrowClick = () => {
+    setCharacterSelectIndex(prevIndex => {
+      if (prevIndex === 0){
+        const newIndex = characterColors.length - 1;
+        window.dispatchEvent(new CustomEvent("customizationAction", {
+          detail: {
+            action: "changeCharacterColor",
+            payload: {
+              currentCharacterColor: characterColors[newIndex % characterColors.length]
+            }
+          }
+        }))
+        return newIndex
+      } else {
+        const newIndex = prevIndex - 1;
+        window.dispatchEvent(new CustomEvent("customizationAction", {
+          detail: {
+            action: "changeCharacterColor",
+            payload: {
+              currentCharacterColor: characterColors[newIndex % characterColors.length]
+            }
+          }
+        }))
+        return newIndex;
+      }
+    });
+    
+  }
+
+  const handleCharacterSpriteRightArrowClick = () => {
+
+    setCharacterSelectIndex(prevIndex => {
+        const newIndex = prevIndex + 1;
+        window.dispatchEvent(new CustomEvent("customizationAction", {
+          detail: {
+            action: "changeCharacterColor",
+            payload: {
+              currentCharacterColor: characterColors[newIndex % characterColors.length]
+            }
+          }
+        }))
+        return newIndex;
+    });
+  }
 
   useEffect(() => {
     if (!characterCustomizationRef.current || !petCustomizationRef.current) return;
@@ -207,13 +294,11 @@ const CharacterMenu = () => {
           pixelArt: true,
         },
     };
-    console.log("Mounting scenes")
 
     const characterCustomizationGame = new Phaser.Game(characterCustomizationConfig);
     const companionCustomizationGame = new Phaser.Game(companionCustomizationConfig);
     
     return () => {
-      console.log("running the destroy scenes")
       characterCustomizationGame.destroy(true)
       companionCustomizationGame.destroy(true)
     }
@@ -298,7 +383,7 @@ const CharacterMenu = () => {
                   {/* Character sprite */}
                 </div>
               </div>
-              <ArrowButtons />
+              <ArrowButtons leftArrowClick={handleCharacterSpriteLeftArrowClick} rightArrowClick={handleCharacterSpriteRightArrowClick}/>
 
               {/* Pet Display */}
               <div
@@ -308,8 +393,8 @@ const CharacterMenu = () => {
                   backgroundSize: "100% 100%",
                   backgroundRepeat: "no-repeat",
                   imageRendering: "pixelated",
-                  width: "68px",
-                  height: "68px",
+                  width: "80px",
+                  height: "80px",
                 }}
               >
                 <div
@@ -320,6 +405,7 @@ const CharacterMenu = () => {
                   {/* Pet sprite */}
                 </div>
               </div>
+              {<PriceBox price={100} clickHandler={()=>({})}/>}
               <ArrowButtons />
             </div>
 

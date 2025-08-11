@@ -6,37 +6,120 @@ import titleBox from "../assets/UI/TitleBox_64x16.png";
 import leftArrow from "../assets/UI/LeftArrowButton_7x10.png";
 import rightArrow from "../assets/UI/RightArrowButton_7x10.png";
 import cornerExitKnot from "../assets/UI/CornerKnot_14x14.png";
-import { PetCustomizationScene, CharacterCustomizationScene } from "../scenes/CharacterCustomizationScene";
+import {
+  PetCustomizationScene,
+  CharacterCustomizationScene,
+} from "../scenes/CharacterCustomizationScene";
 import { useAppContext } from "../AppContext";
-import { useRef, useState, useEffect, type PropsWithChildren, type FunctionComponent, type MouseEventHandler } from "react"
-import Phaser from "phaser"
-import {hats, femaleClothing, femaleHair, femaleHand, maleClothing, maleHair, maleHand, petCompanions} from "../assetMap"
+import {
+  useRef,
+  useState,
+  useEffect,
+  type PropsWithChildren,
+  type FunctionComponent,
+  type MouseEventHandler,
+} from "react";
+import Phaser from "phaser";
+import {
+  hats,
+  femaleSkirt,
+  femaleOutfit,
+  femaleHair,
+  femaleHand,
+  maleTopClothing,
+  maleBottomClothing,
+  maleHair,
+  maleHand,
+  petCompanions,
+  femaleFootwear,
+  maleFootwear
+} from "../assetMap";
 
-const PriceBox: FunctionComponent<{price: number, clickHandler: MouseEventHandler<HTMLDivElement>}> = ({price, clickHandler}) => {
+const CustomizationItem: FunctionComponent<{
+  title: string;
+  image?: string;
+  price?: number;
+  buyHandler?: MouseEventHandler<HTMLDivElement>;
+}> = ({ title, image, price, buyHandler }) => {
+  const [currentItemIndex, setCurrentItemIndex] = useState(0)
   return (
-    
+    <div className="flex flex-col items-center">
       <div
-        className="relative px-2 py-1 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
+        className="relative px-3 py-1 mb-2"
         style={{
-          backgroundImage: `url(${priceBox})`,
+          backgroundImage: `url(${titleBox})`,
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
           imageRendering: "pixelated",
-          minWidth: "52px",
-          height: "14px",
+          minWidth: "80px",
+          height: "24px",
         }}
-        onClick={clickHandler}
       >
-        <span 
-          className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
+        <span
+          className="text-white text-xs font-bold leading-none flex items-center justify-center h-full uppercase"
           style={{ textShadow: "1px 1px 0px #000" }}
         >
-          {price}G
+          {title}
         </span>
       </div>
-   
-  )
-}
+      <ArrowButtons>
+        <div
+          className="relative mb-2"
+          style={{
+            backgroundImage: `url(${characterBg})`,
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+            imageRendering: "pixelated",
+            width: "64px",
+            height: "64px",
+          }}
+        >
+          {image ? (
+            <img
+              src={image}
+              alt={title}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                imageRendering: "pixelated",
+                transform: "scale(1.6)",
+              }}
+            />
+          ) : null}
+        </div>
+      </ArrowButtons>
+
+      {/* Price Button - only show if not owned */}
+      {price ? <PriceBox price={price} clickHandler={buyHandler!} /> : <></>}
+    </div>
+  );
+};
+
+const PriceBox: FunctionComponent<{
+  price: number;
+  clickHandler: MouseEventHandler<HTMLDivElement>;
+}> = ({ price, clickHandler }) => {
+  return (
+    <div
+      className="relative px-2 py-2 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
+      style={{
+        backgroundImage: `url(${priceBox})`,
+        backgroundSize: "100% 100%",
+        backgroundRepeat: "no-repeat",
+        imageRendering: "pixelated",
+        minWidth: "52px",
+        height: "14px",
+      }}
+      onClick={clickHandler}
+    >
+      <span
+        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
+        style={{ textShadow: "1px 1px 0px #000" }}
+      >
+        {price}G
+      </span>
+    </div>
+  );
+};
 
 const CoinDisplay: FunctionComponent<{
   coinAmount: number;
@@ -58,12 +141,13 @@ const CoinDisplay: FunctionComponent<{
         <div
           className="w-4 h-4 rounded-full border-2 border-yellow-400 bg-yellow-300 flex items-center justify-center"
           style={{
-            boxShadow: "inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.3)"
+            boxShadow:
+              "inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.3)",
           }}
         >
           <span className="text-xs font-bold text-yellow-800">G</span>
         </div>
-        <span 
+        <span
           className="text-white text-sm font-bold leading-none flex-1 text-center"
           style={{ textShadow: "1px 1px 0px #000" }}
         >
@@ -74,10 +158,12 @@ const CoinDisplay: FunctionComponent<{
   );
 };
 
-const ArrowButtons: FunctionComponent<PropsWithChildren<{
-  leftArrowClick?: MouseEventHandler<HTMLImageElement>,
-  rightArrowClick?: MouseEventHandler<HTMLImageElement>
-}>> = ({children, leftArrowClick, rightArrowClick}) => {
+const ArrowButtons: FunctionComponent<
+  PropsWithChildren<{
+    leftArrowClick?: MouseEventHandler<HTMLImageElement>;
+    rightArrowClick?: MouseEventHandler<HTMLImageElement>;
+  }>
+> = ({ children, leftArrowClick, rightArrowClick }) => {
   return (
     <div className="flex items-center justify-center gap-2">
       <img
@@ -100,7 +186,7 @@ const ArrowButtons: FunctionComponent<PropsWithChildren<{
 };
 
 const GenderToggleButton: FunctionComponent<{
-  gender: 'male' | 'female';
+  gender: "male" | "female";
   isActive: boolean;
   isDisabled: boolean;
   onClick: () => void;
@@ -108,9 +194,9 @@ const GenderToggleButton: FunctionComponent<{
   return (
     <div
       className={`relative px-3 py-1 transition-all duration-150 ${
-        isDisabled 
-          ? 'cursor-not-allowed opacity-50' 
-          : 'cursor-pointer hover:scale-105 active:scale-95'
+        isDisabled
+          ? "cursor-not-allowed opacity-50"
+          : "cursor-pointer hover:scale-105 active:scale-95"
       }`}
       style={{
         backgroundImage: `url(${priceBox})`,
@@ -119,13 +205,17 @@ const GenderToggleButton: FunctionComponent<{
         imageRendering: "pixelated",
         minWidth: "40px",
         height: "20px",
-        filter: isDisabled ? 'brightness(0.6) saturate(0.5)' : isActive ? 'brightness(1.2)' : 'brightness(1)',
+        filter: isDisabled
+          ? "brightness(0.6) saturate(0.5)"
+          : isActive
+          ? "brightness(1.2)"
+          : "brightness(1)",
       }}
       onClick={!isDisabled ? onClick : undefined}
     >
-      <span 
+      <span
         className={`text-white text-sm font-bold leading-none flex items-center justify-center h-full ${
-          isActive ? 'text-yellow-200' : 'text-white'
+          isActive ? "text-yellow-200" : "text-white"
         }`}
         style={{ textShadow: "1px 1px 0px #000" }}
       >
@@ -151,7 +241,7 @@ const AcceptButton: FunctionComponent<{
       }}
       onClick={onClick}
     >
-      <span 
+      <span
         className="text-white text-sm font-bold leading-none flex items-center justify-center h-full"
         style={{ textShadow: "1px 1px 0px #000" }}
       >
@@ -162,26 +252,20 @@ const AcceptButton: FunctionComponent<{
 };
 
 const CharacterMenu = () => {
-    const characterCustomizationRef = useRef<HTMLDivElement>(null);
-    const petCustomizationRef = useRef<HTMLDivElement>(null);
-    const isScenesMountedRef = useRef<boolean>(false);
+  const characterCustomizationRef = useRef<HTMLDivElement>(null);
+  const petCustomizationRef = useRef<HTMLDivElement>(null);
+  const isScenesMountedRef = useRef<boolean>(false);
 
-    const [characterSelectIndex, setCharacterSelectIndex] = useState(0)
+  const [_, setCharacterSelectIndex] = useState(0);
 
-    const characterColors = [
-      "ivory",
-      "onyx",
-      "bronze",
-      "sandstone",
-      "umber"
-    ]
+  const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"];
 
   const {
     setIsCharacterCustomizeMenuOpen,
     gameConfig: { characterGender, coins },
     // setGameConfig,
   } = useAppContext();
-  const [myGender, setMyGender] = useState(characterGender)
+  const [myGender, setMyGender] = useState(characterGender);
 
   const isMale = myGender === "male";
   const isFemale = myGender === "female";
@@ -190,23 +274,24 @@ const CharacterMenu = () => {
     setIsCharacterCustomizeMenuOpen(false);
   };
 
-  const handleGenderToggle = (gender: 'male' | 'female') => {
+  const handleGenderToggle = (gender: "male" | "female") => {
     if (gender !== myGender) {
-      setMyGender(() => { 
-        window.dispatchEvent(new CustomEvent("customizationAction", {detail: {
-          action: "genderChange",
-          payload: {
-            gender
-          }
-        }}));
-        
+      setMyGender(() => {
+        window.dispatchEvent(
+          new CustomEvent("customizationAction", {
+            detail: {
+              action: "genderChange",
+              payload: {
+                gender,
+              },
+            },
+          })
+        );
+
         return gender;
-    
-    });
+      });
     }
   };
-
-
 
   const handleAcceptChanges = () => {
     // Here you can add any logic to save/apply the customization changes
@@ -216,93 +301,127 @@ const CharacterMenu = () => {
   };
 
   const handleCharacterSpriteLeftArrowClick = () => {
-    setCharacterSelectIndex(prevIndex => {
-      if (prevIndex === 0){
+    setCharacterSelectIndex((prevIndex) => {
+      if (prevIndex === 0) {
         const newIndex = characterColors.length - 1;
-        window.dispatchEvent(new CustomEvent("customizationAction", {
-          detail: {
-            action: "changeCharacterColor",
-            payload: {
-              currentCharacterColor: characterColors[newIndex % characterColors.length]
-            }
-          }
-        }))
-        return newIndex
+        window.dispatchEvent(
+          new CustomEvent("customizationAction", {
+            detail: {
+              action: "changeCharacterColor",
+              payload: {
+                currentCharacterColor:
+                  characterColors[newIndex % characterColors.length],
+              },
+            },
+          })
+        );
+        return newIndex;
       } else {
         const newIndex = prevIndex - 1;
-        window.dispatchEvent(new CustomEvent("customizationAction", {
-          detail: {
-            action: "changeCharacterColor",
-            payload: {
-              currentCharacterColor: characterColors[newIndex % characterColors.length]
-            }
-          }
-        }))
+        window.dispatchEvent(
+          new CustomEvent("customizationAction", {
+            detail: {
+              action: "changeCharacterColor",
+              payload: {
+                currentCharacterColor:
+                  characterColors[newIndex % characterColors.length],
+              },
+            },
+          })
+        );
         return newIndex;
       }
     });
-    
-  }
+  };
 
   const handleCharacterSpriteRightArrowClick = () => {
-
-    setCharacterSelectIndex(prevIndex => {
-        const newIndex = prevIndex + 1;
-        window.dispatchEvent(new CustomEvent("customizationAction", {
+    setCharacterSelectIndex((prevIndex) => {
+      const newIndex = prevIndex + 1;
+      window.dispatchEvent(
+        new CustomEvent("customizationAction", {
           detail: {
             action: "changeCharacterColor",
             payload: {
-              currentCharacterColor: characterColors[newIndex % characterColors.length]
-            }
-          }
-        }))
-        return newIndex;
+              currentCharacterColor:
+                characterColors[newIndex % characterColors.length],
+            },
+          },
+        })
+      );
+      return newIndex;
     });
-  }
+  };
 
   useEffect(() => {
-    if (!characterCustomizationRef.current || !petCustomizationRef.current) return;
-    if(isScenesMountedRef.current) return
-    isScenesMountedRef.current = true
+    if (!characterCustomizationRef.current || !petCustomizationRef.current)
+      return;
+    if (isScenesMountedRef.current) return;
+    isScenesMountedRef.current = true;
     const characterCustomizationConfig: Phaser.Types.Core.GameConfig = {
-        type: Phaser.AUTO,
-        width: characterCustomizationRef.current.clientWidth,
-        height: characterCustomizationRef.current.clientHeight,
-        parent: characterCustomizationRef.current,
-        scene: CharacterCustomizationScene,
-        scale: {
-          mode: Phaser.Scale.RESIZE,
-          autoCenter: Phaser.Scale.CENTER_BOTH,
-        },
-        render: {
-          antialias: false,
-          pixelArt: true,
-        },
-    }
+      type: Phaser.AUTO,
+      width: characterCustomizationRef.current.clientWidth,
+      height: characterCustomizationRef.current.clientHeight,
+      parent: characterCustomizationRef.current,
+      scene: CharacterCustomizationScene,
+      scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
+      render: {
+        antialias: false,
+        pixelArt: true,
+      },
+    };
     const companionCustomizationConfig: Phaser.Types.Core.GameConfig = {
-        type: Phaser.AUTO,
-        width: petCustomizationRef.current.clientWidth,
-        height: petCustomizationRef.current.clientHeight,
-        parent: petCustomizationRef.current,
-        scene: PetCustomizationScene,
-        scale: {
-          mode: Phaser.Scale.RESIZE,
-          autoCenter: Phaser.Scale.CENTER_BOTH,
-        },
-        render: {
-          antialias: false,
-          pixelArt: true,
-        },
+      type: Phaser.AUTO,
+      width: petCustomizationRef.current.clientWidth,
+      height: petCustomizationRef.current.clientHeight,
+      parent: petCustomizationRef.current,
+      scene: PetCustomizationScene,
+      scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
+      render: {
+        antialias: false,
+        pixelArt: true,
+      },
     };
 
-    const characterCustomizationGame = new Phaser.Game(characterCustomizationConfig);
-    const companionCustomizationGame = new Phaser.Game(companionCustomizationConfig);
-    
+    const characterCustomizationGame = new Phaser.Game(
+      characterCustomizationConfig
+    );
+    const companionCustomizationGame = new Phaser.Game(
+      companionCustomizationConfig
+    );
+
     return () => {
-      characterCustomizationGame.destroy(true)
-      companionCustomizationGame.destroy(true)
-    }
-  }, [])
+      characterCustomizationGame.destroy(true);
+      companionCustomizationGame.destroy(true);
+    };
+  }, []);
+
+  const maleAssetsCategory = [
+    {
+      title: "TOP",
+      assets: maleTopClothing,
+    },
+    {
+      title: "BOTTOM",
+      assets: maleBottomClothing,
+    },
+  ];
+
+  const femaleAssetCategories = [
+    {
+      title: "outfit",
+      asset: femaleOutfit,
+    },
+    {
+      title: "skirt",
+      asset: femaleSkirt,
+    },
+  ];
 
   return (
     <div className="absolute inset-0 flex items-center justify-center z-10 p-4">
@@ -332,7 +451,7 @@ const CharacterMenu = () => {
         />
 
         {/* Content Container with Purple Background */}
-        <div 
+        <div
           className="w-full h-full p-4 flex flex-col gap-4"
           style={{
             backgroundColor: "#6b4c8a",
@@ -349,13 +468,13 @@ const CharacterMenu = () => {
               gender="male"
               isActive={isMale}
               isDisabled={isMale}
-              onClick={() => handleGenderToggle('male')}
+              onClick={() => handleGenderToggle("male")}
             />
             <GenderToggleButton
               gender="female"
               isActive={isFemale}
               isDisabled={isFemale}
-              onClick={() => handleGenderToggle('female')}
+              onClick={() => handleGenderToggle("female")}
             />
           </div>
 
@@ -383,7 +502,10 @@ const CharacterMenu = () => {
                   {/* Character sprite */}
                 </div>
               </div>
-              <ArrowButtons leftArrowClick={handleCharacterSpriteLeftArrowClick} rightArrowClick={handleCharacterSpriteRightArrowClick}/>
+              <ArrowButtons
+                leftArrowClick={handleCharacterSpriteLeftArrowClick}
+                rightArrowClick={handleCharacterSpriteRightArrowClick}
+              />
 
               {/* Pet Display */}
               <div
@@ -405,489 +527,40 @@ const CharacterMenu = () => {
                   {/* Pet sprite */}
                 </div>
               </div>
-              {<PriceBox price={100} clickHandler={()=>({})}/>}
+              {<PriceBox price={100} clickHandler={() => ({})} />}
               <ArrowButtons />
             </div>
 
             {/* RIGHT: Customization Options */}
             <div className="flex-1 grid grid-rows-3 grid-cols-3 gap-3">
               {/* HATS */}
-              <div className="flex flex-col items-center">
-                <div
-                  className="relative px-3 py-1 mb-2"
-                  style={{
-                    backgroundImage: `url(${titleBox})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    minWidth: "80px",
-                    height: "24px",
-                  }}
-                >
-                  <span 
-                    className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                    style={{ textShadow: "1px 1px 0px #000" }}
-                  >
-                    HATS
-                  </span>
-                </div>
-                <ArrowButtons>
+              <CustomizationItem
+                title="HATS"
+                price={100}
+                buyHandler={() => ({})}
+              />
 
-                <div
-                  className="relative mb-2"
-                  style={{
-                    backgroundImage: `url(${characterBg})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    width: "64px",
-                    height: "64px",
-                  }}
-                >
+              {isMale &&
+                maleAssetsCategory.map((item) => (
+                  <CustomizationItem title={item.title} />
+                ))}
 
-                  <img 
-                    src={hats.get("Blue cap")?.icon} 
-                    alt="Hat" 
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ 
-                      imageRendering: "pixelated",
-                      transform: "scale(1.6)",
-                    }}
-                  />
-
-                </div>
-                </ArrowButtons >
-
-                {/* Price Button - only show if not owned */}
-                {!hats.get("Blue cap")?.owned && (
-                  <div
-                    className="relative px-2 py-1 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
-                    style={{
-                      backgroundImage: `url(${priceBox})`,
-                      backgroundSize: "100% 100%",
-                      backgroundRepeat: "no-repeat",
-                      imageRendering: "pixelated",
-                      minWidth: "52px",
-                      height: "14px",
-                    }}
-                  >
-                    <span 
-                      className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                      style={{ textShadow: "1px 1px 0px #000" }}
-                    >
-                      {hats.get("Blue cap")?.price || "100"}G
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {isMale && (
-                <>
-                  {/* MALE TOP */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="relative px-3 py-1 mb-2"
-                      style={{
-                        backgroundImage: `url(${titleBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "80px",
-                        height: "24px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        TOP
-                      </span>
-                    </div>
-                    <div
-                      className="relative mb-2"
-                      style={{
-                        backgroundImage: `url(${characterBg})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        width: "64px",
-                        height: "64px",
-                      }}
-                    >
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          transform: "scale(1.6)",
-                          transformOrigin: "center",
-                        }}
-                      >
-                        {/* Male top display */}
-                      </div>
-                    </div>
-                    {/* Price Button - only show if not owned */}
-                    {/* Assuming current item is not owned for demo */}
-                    <div
-                      className="relative px-2 py-1 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
-                      style={{
-                        backgroundImage: `url(${priceBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "52px",
-                        height: "14px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        150G
-                      </span>
-                    </div>
-                    <ArrowButtons />
-                  </div>
-
-                  {/* MALE BOTTOM */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="relative px-3 py-1 mb-2"
-                      style={{
-                        backgroundImage: `url(${titleBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "80px",
-                        height: "24px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        BOTTOM
-                      </span>
-                    </div>
-                    <div
-                      className="relative mb-2"
-                      style={{
-                        backgroundImage: `url(${characterBg})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        width: "64px",
-                        height: "64px",
-                      }}
-                    >
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          transform: "scale(1.6)",
-                          transformOrigin: "center",
-                        }}
-                      >
-                        {/* Male bottom display */}
-                      </div>
-                    </div>
-                    {/* Price Button - only show if not owned */}
-                    {/* Assuming current item is not owned for demo */}
-                    <div
-                      className="relative px-2 py-1 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
-                      style={{
-                        backgroundImage: `url(${priceBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "52px",
-                        height: "14px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        120G
-                      </span>
-                    </div>
-                    <ArrowButtons />
-                  </div>
-                </>
-              )}
-
-              {isFemale && (
-                <>
-                  {/* FEMALE OUTFIT */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="relative px-3 py-1 mb-2"
-                      style={{
-                        backgroundImage: `url(${titleBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "80px",
-                        height: "24px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        OUTFIT
-                      </span>
-                    </div>
-                    <div
-                      className="relative mb-2"
-                      style={{
-                        backgroundImage: `url(${characterBg})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        width: "64px",
-                        height: "64px",
-                      }}
-                    >
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          transform: "scale(1.6)",
-                          transformOrigin: "center",
-                        }}
-                      >
-                        {/* Female outfit display */}
-                      </div>
-                    </div>
-                    {/* Price Button - only show if not owned */}
-                    {/* Assuming current item is not owned for demo */}
-                    <div
-                      className="relative px-2 py-1 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
-                      style={{
-                        backgroundImage: `url(${priceBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "52px",
-                        height: "14px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        200G
-                      </span>
-                    </div>
-                    <ArrowButtons />
-                  </div>
-
-                  {/* FEMALE SKIRT */}
-                  <div className="flex flex-col items-center">
-                    <div
-                      className="relative px-3 py-1 mb-2"
-                      style={{
-                        backgroundImage: `url(${titleBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "80px",
-                        height: "24px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        SKIRT
-                      </span>
-                    </div>
-                    <div
-                      className="relative mb-2"
-                      style={{
-                        backgroundImage: `url(${characterBg})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        width: "64px",
-                        height: "64px",
-                      }}
-                    >
-                      <div
-                        className="absolute inset-0"
-                        style={{
-                          transform: "scale(1.6)",
-                          transformOrigin: "center",
-                        }}
-                      >
-                        {/* Female skirt display */}
-                      </div>
-                    </div>
-                    {/* Price Button - only show if not owned */}
-                    {/* Assuming current item is not owned for demo */}
-                    <div
-                      className="relative px-2 py-1 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
-                      style={{
-                        backgroundImage: `url(${priceBox})`,
-                        backgroundSize: "100% 100%",
-                        backgroundRepeat: "no-repeat",
-                        imageRendering: "pixelated",
-                        minWidth: "52px",
-                        height: "14px",
-                      }}
-                    >
-                      <span 
-                        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                        style={{ textShadow: "1px 1px 0px #000" }}
-                      >
-                        80G
-                      </span>
-                    </div>
-                    <ArrowButtons />
-                  </div>
-                </>
-              )}
+              {isFemale &&
+                femaleAssetCategories.map((item) => (
+                  <CustomizationItem title={item.title} />
+                ))}
 
               {/* FOOTWEAR */}
-              <div className="flex flex-col items-center">
-                <div
-                  className="relative px-3 py-1 mb-2"
-                  style={{
-                    backgroundImage: `url(${titleBox})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    minWidth: "80px",
-                    height: "24px",
-                  }}
-                >
-                  <span 
-                    className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                    style={{ textShadow: "1px 1px 0px #000" }}
-                  >
-                    FOOTWEAR
-                  </span>
-                </div>
-                <div
-                  className="relative p-2 mb-2"
-                  style={{
-                    backgroundImage: `url(${characterBg})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    width: "48px",
-                    height: "48px",
-                  }}
-                >
-                  {/* Footwear display */}
-                </div>
-                <ArrowButtons />
-              </div>
+              <CustomizationItem  title="footwear" />
 
               {/* HAND ITEM */}
-              <div className="flex flex-col items-center">
-                <div
-                  className="relative px-3 py-1 mb-2"
-                  style={{
-                    backgroundImage: `url(${titleBox})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    minWidth: "80px",
-                    height: "24px",
-                  }}
-                >
-                  <span 
-                    className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                    style={{ textShadow: "1px 1px 0px #000" }}
-                  >
-                    HAND ITEM
-                  </span>
-                </div>
-                <div
-                  className="relative p-2 mb-2"
-                  style={{
-                    backgroundImage: `url(${characterBg})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    width: "48px",
-                    height: "48px",
-                  }}
-                >
-                  {/* Hand item display */}
-                </div>
-                <ArrowButtons />
-              </div>
+              <CustomizationItem  title="hand item" />
 
               {/* HAIR */}
-              <div className="flex flex-col items-center">
-                <div
-                  className="relative px-3 py-1 mb-2"
-                  style={{
-                    backgroundImage: `url(${titleBox})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    minWidth: "80px",
-                    height: "24px",
-                  }}
-                >
-                  <span 
-                    className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                    style={{ textShadow: "1px 1px 0px #000" }}
-                  >
-                    HAIR
-                  </span>
-                </div>
-                <div
-                  className="relative p-2 mb-2"
-                  style={{
-                    backgroundImage: `url(${characterBg})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    width: "48px",
-                    height: "48px",
-                  }}
-                >
-                  {/* Hair display */}
-                </div>
-                <ArrowButtons />
-              </div>
+              <CustomizationItem title="hair" />
 
               {/* PET ACCESSORIES */}
-              <div className="flex flex-col items-center">
-                <div
-                  className="relative px-3 py-1 mb-2"
-                  style={{
-                    backgroundImage: `url(${titleBox})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    minWidth: "80px",
-                    height: "24px",
-                  }}
-                >
-                  <span 
-                    className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-                    style={{ textShadow: "1px 1px 0px #000" }}
-                  >
-                    PET ACC
-                  </span>
-                </div>
-                <div
-                  className="relative p-2 mb-2"
-                  style={{
-                    backgroundImage: `url(${characterBg})`,
-                    backgroundSize: "100% 100%",
-                    backgroundRepeat: "no-repeat",
-                    imageRendering: "pixelated",
-                    width: "48px",
-                    height: "48px",
-                  }}
-                >
-                  {/* Pet accessories display */}
-                </div>
-                <ArrowButtons />
-              </div>
+              <CustomizationItem title="pet accessories" />
             </div>
           </div>
 

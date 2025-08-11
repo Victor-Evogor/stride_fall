@@ -291,163 +291,341 @@ interface Asset {
   price?: number
 }
 
-// Export Maps
-export const hats = new Map<string, Asset>([
-  ["Blue cap", { icon: blueCapIcon, sprite: blueCap, price: 300 }],
-  ["Blue mage hat", { icon: blueMageHatIcon, sprite: blueMageHat, price: 500 }],
-  ["Blue mushroom hat", { icon: blueMushroomHatIcon, sprite: blueMushroomHat, price: 800 }],
-  ["Farming hat", { icon: farmingHatIcon, sprite: farmingHat, price: 1_000 }],
-  ["Green cap", { icon: greenCapIcon, sprite: greenCap, price: 300 }],
-  ["Green mage hat", { icon: greenMageHatIcon, sprite: greenMageHat, price: 500 }],
-  ["Green mushroom hat", { icon: greenMushroomHatIcon, sprite: greenMushroomHat, price: 800 }],
-  ["Guard helmet", { icon: guardHelmetIcon, sprite: guardHelmet, price: 1_000 }],
-  ["Orange cap", { icon: orangeCapIcon, sprite: orangeCap, price: 300 }],
-  ["Orange mage hat", { icon: orangeMageHatIcon, sprite: orangeMageHat, price: 500 }],
-  ["Orange mushroom hat", { icon: orangeMushroomHatIcon, sprite: orangeMushroomHat, price: 800 }],
-  ["Pumpkin hat", { icon: pumpkinHatIcon, sprite: pumpkinHat, price: 1000 }],
-  ["Purple cap", { icon: purpleCapIcon, sprite: purpleCap, price: 300 }],
-  ["Purple mage hat", { icon: purpleMageHatIcon, sprite: purpleMageHat, price: 500 }],
-  ["Purple mushroom hat", { icon: purpleMushroomHatIcon, sprite: purpleMushroomHat, price: 800 }],
-  ["Red cap", { icon: redCapIcon, sprite: redCap, price: 300 }],
-  ["Red mage hat", { icon: redMageHatIcon, sprite: redMageHat, price: 500 }],
-  ["Red mushroom hat", { icon: redMushroomHatIcon, sprite: redMushroomHat, price: 800 }],
-  ["Santa hat", { icon: santaHatIcon, sprite: santaHat, price: 1200 }],
-  ["Viking helmet with horns", { icon: vikingHelmetWithHornsIcon, sprite: vikingHelmetWithHorns, price: 1300 }],
-  ["Viking helmet", { icon: vikingHelmetIcon, sprite: vikingHelmet, price: 1200 }]
-]);
+type hatsAssetKeys =
+  | "Blue cap"
+  | "Blue mage hat"
+  | "Blue mushroom hat"
+  | "Farming hat"
+  | "Green cap"
+  | "Green mage hat"
+  | "Green mushroom hat"
+  | "Guard helmet"
+  | "Orange cap"
+  | "Orange mage hat"
+  | "Orange mushroom hat"
+  | "Pumpkin hat"
+  | "Purple cap"
+  | "Purple mage hat"
+  | "Purple mushroom hat"
+  | "Red cap"
+  | "Red mage hat"
+  | "Red mushroom hat"
+  | "Santa hat"
+  | "Viking helmet with horns"
+  | "Viking helmet";
 
-export const maleHand = new Map<string, Asset>([
-  ["Bronze axe", { icon: mBronzeAxeIcon, sprite: mBronzeAxe, price: 500 }],
-  ["Bronze pickaxe", { icon: mBronzePickaxeIcon, sprite: mBronzePickaxe, price: 500 }],
-  ["Bronze sword", { icon: mBronzeSwordIcon, sprite: mBronzeSword, price: 500 }],
-  ["Diamond axe", { icon: mDiamondAxeIcon, sprite: mDiamondAxe, price: 800 }],
-  ["Diamond pickaxe", { icon: mDiamondPickaxeIcon, sprite: mDiamondPickaxe, price: 800 }],
-  ["Diamond sword", { icon: mDiamondSwordIcon, sprite: mDiamondSword, price: 800 }],
-  ["Golden axe", { icon: mGoldenAxeIcon, sprite: mGoldenAxe, price: 600 }],
-  ["Golden pickaxe", { icon: mGoldenPickaxeIcon, sprite: mGoldenPickaxe, price: 600 }],
-  ["Golden sword", { icon: mGoldenSwordIcon, sprite: mGoldenSword, price: 600 }],
-  ["Hoe M", { icon: hoeMIcon, sprite: hoeM, price: 300 }],
-  ["Iron axe", { icon: mIronAxeIcon, sprite: mIronAxe, price: 500 }],
-  ["Iron pickaxe", { icon: mIronPickaxeIcon, sprite: mIronPickaxe, price: 500 }],
-  ["Iron sword", { icon: mIronSwordIcon, sprite: mIronSword, price: 500 }],
-  ["Stick", { icon: mStickIcon, sprite: mStick, price: 100 }],
-  ["Sword", { icon: mSwordIcon, sprite: mSword, price: 400 }],
-  ["Wooden axe", { icon: mWoodenAxeIcon, sprite: mWoodenAxe, price: 400 }],
-  ["Wooden pickaxe", { icon: mWoodenPickaxeIcon, sprite: mWoodenPickaxe, price: 400 }],
-  ["Wooden sword", { icon: mWoodenSwordIcon, sprite: mWoodenSword, price: 400 }]
-]);
+export const hats: Record<hatsAssetKeys, Asset> = {
+  "Blue cap": { icon: blueCapIcon, sprite: blueCap, price: 300 },
+  "Blue mage hat": { icon: blueMageHatIcon, sprite: blueMageHat, price: 500 },
+  "Blue mushroom hat": { icon: blueMushroomHatIcon, sprite: blueMushroomHat, price: 800 },
+  "Farming hat": { icon: farmingHatIcon, sprite: farmingHat, price: 1_000 },
+  "Green cap": { icon: greenCapIcon, sprite: greenCap, price: 300 },
+  "Green mage hat": { icon: greenMageHatIcon, sprite: greenMageHat, price: 500 },
+  "Green mushroom hat": { icon: greenMushroomHatIcon, sprite: greenMushroomHat, price: 800 },
+  "Guard helmet": { icon: guardHelmetIcon, sprite: guardHelmet, price: 1_000 },
+  "Orange cap": { icon: orangeCapIcon, sprite: orangeCap, price: 300 },
+  "Orange mage hat": { icon: orangeMageHatIcon, sprite: orangeMageHat, price: 500 },
+  "Orange mushroom hat": { icon: orangeMushroomHatIcon, sprite: orangeMushroomHat, price: 800 },
+  "Pumpkin hat": { icon: pumpkinHatIcon, sprite: pumpkinHat, price: 1000 },
+  "Purple cap": { icon: purpleCapIcon, sprite: purpleCap, price: 300 },
+  "Purple mage hat": { icon: purpleMageHatIcon, sprite: purpleMageHat, price: 500 },
+  "Purple mushroom hat": { icon: purpleMushroomHatIcon, sprite: purpleMushroomHat, price: 800 },
+  "Red cap": { icon: redCapIcon, sprite: redCap, price: 300 },
+  "Red mage hat": { icon: redMageHatIcon, sprite: redMageHat, price: 500 },
+  "Red mushroom hat": { icon: redMushroomHatIcon, sprite: redMushroomHat, price: 800 },
+  "Santa hat": { icon: santaHatIcon, sprite: santaHat, price: 1200 },
+  "Viking helmet with horns": { icon: vikingHelmetWithHornsIcon, sprite: vikingHelmetWithHorns, price: 1300 },
+  "Viking helmet": { icon: vikingHelmetIcon, sprite: vikingHelmet, price: 1200 }
+};
 
-export const maleHair = new Map<string, Asset>([
-  ["Black hair", { icon: mBlackHairIcon, sprite: mBlackHair }],
-  ["Blonde hair", { icon: mBlondeHairIcon, sprite: mBlondeHair }],
-  ["Brown hair", { icon: mBrownHairIcon, sprite: mBrownHair }],
-  ["Golden hair", { icon: mGoldenHairIcon, sprite: mGoldenHair }],
-  ["Red hair", { icon: mRedHairIcon, sprite: mRedHair }],
-]);
+type maleHandAssetKeys =
+  | "Bronze axe"
+  | "Bronze pickaxe"
+  | "Bronze sword"
+  | "Diamond axe"
+  | "Diamond pickaxe"
+  | "Diamond sword"
+  | "Golden axe"
+  | "Golden pickaxe"
+  | "Golden sword"
+  | "Hoe M"
+  | "Iron axe"
+  | "Iron pickaxe"
+  | "Iron sword"
+  | "Stick"
+  | "Sword"
+  | "Wooden axe"
+  | "Wooden pickaxe"
+  | "Wooden sword";
 
-export const maleClothing = new Map<string, Asset>([
-  ["Blue pants", { icon: bluePantsIcon, sprite: bluePants, price: 500 }],
-  ["Blue shirt", { icon: blueShirtIcon, sprite: blueShirt, price: 500 }],
-  ["Boots", { icon: mBootsIcon, sprite: mBoots, price: 800 }],
-  ["Green pants", { icon: greenPantsIcon, sprite: greenPants, price: 500 }],
-  ["Green shirt", { icon: greenShirtIcon, sprite: greenShirt, price: 500 }],
-  ["Green underwear", { icon: greenUnderwearIcon, sprite: greenUnderwear, price: 300 }],
-  ["Orange shirt", { icon: orangeShirtIcon, sprite: orangeShirt, price: 500 }],
-  ["Orange pants", { icon: orangePantsIcon, sprite: orangePants, price: 500 }],
-  ["Orange underwear", { icon: orangeUnderwearIcon, sprite: orangeUnderwear, price: 300 }],
-  ["Pants", { icon: pantsIcon, sprite: pants, price: 500 }],
-  ["Purple pants", { icon: purplePantsIcon, sprite: purplePants, price: 500 }],
-  ["Purple shirt", { icon: purpleShirtIcon, sprite: purpleShirt, price: 500 }],
-  ["Purple underwear", { icon: purpleUnderwearIcon, sprite: purpleUnderwear, price: 300 }],
-  ["Red underwear", { icon: redUnderwearIcon, sprite: redUnderwear, price: 300 }],
-  ["Shirt", { icon: shirtIcon, sprite: shirt, price: 500 }],
-  ["Shirt v2", { icon: shirtV2Icon, sprite: shirtV2, price: 500 }],
-  ["Shoes", { icon: shoesIcon, sprite: shoes, price: 300 }],
-  ["Sky blue underwear", { icon: skyblueUnderwearIcon, sprite: skyblueUnderwear, price: 300 }],
-  ["Underwear", { icon: underwearIcon, sprite: underwear, price: 300 }]
-]);
+export const maleHand: Record<maleHandAssetKeys, Asset> = {
+  "Bronze axe": { icon: mBronzeAxeIcon, sprite: mBronzeAxe, price: 500 },
+  "Bronze pickaxe": { icon: mBronzePickaxeIcon, sprite: mBronzePickaxe, price: 500 },
+  "Bronze sword": { icon: mBronzeSwordIcon, sprite: mBronzeSword, price: 500 },
+  "Diamond axe": { icon: mDiamondAxeIcon, sprite: mDiamondAxe, price: 800 },
+  "Diamond pickaxe": { icon: mDiamondPickaxeIcon, sprite: mDiamondPickaxe, price: 800 },
+  "Diamond sword": { icon: mDiamondSwordIcon, sprite: mDiamondSword, price: 800 },
+  "Golden axe": { icon: mGoldenAxeIcon, sprite: mGoldenAxe, price: 600 },
+  "Golden pickaxe": { icon: mGoldenPickaxeIcon, sprite: mGoldenPickaxe, price: 600 },
+  "Golden sword": { icon: mGoldenSwordIcon, sprite: mGoldenSword, price: 600 },
+  "Hoe M": { icon: hoeMIcon, sprite: hoeM, price: 300 },
+  "Iron axe": { icon: mIronAxeIcon, sprite: mIronAxe, price: 500 },
+  "Iron pickaxe": { icon: mIronPickaxeIcon, sprite: mIronPickaxe, price: 500 },
+  "Iron sword": { icon: mIronSwordIcon, sprite: mIronSword, price: 500 },
+  "Stick": { icon: mStickIcon, sprite: mStick, price: 100 },
+  "Sword": { icon: mSwordIcon, sprite: mSword, price: 400 },
+  "Wooden axe": { icon: mWoodenAxeIcon, sprite: mWoodenAxe, price: 400 },
+  "Wooden pickaxe": { icon: mWoodenPickaxeIcon, sprite: mWoodenPickaxe, price: 400 },
+  "Wooden sword": { icon: mWoodenSwordIcon, sprite: mWoodenSword, price: 400 }
+};
 
-export const maleSkin = new Map<string, string>([
-  ["Bronze skin", mBronzeSkin],
-  ["Ivory skin", mIvorySkin],
-  ["Onyx skin", mOnyxSkin],
-  ["Sandstone skin", mSandstoneSkin],
-  ["Umber skin", mUmberSkin]
-]);
+type maleHairAssetKeys =
+  | "Black hair"
+  | "Blonde hair"
+  | "Brown hair"
+  | "Golden hair"
+  | "Red hair";
 
-export const femaleClothing = new Map<string, Asset>([
-  ["Blue corset", { icon: blueCorsetIcon, sprite: blueCorset, price: 600 }],
-  ["Blue corset v2", { icon: blueCorsetV2Icon, sprite: blueCorsetV2, price: 600 }],
-  ["Blue panties and bra", { icon: bluePantiesAndBraIcon, sprite: bluePantiesAndBra, price: 500 }],
-  ["Boots", { icon: fBootsIcon, sprite: fBoots, price: 500 }],
-  ["Corset", { icon: corsetIcon, sprite: corset, price: 600 }],
-  ["Corset v2", { icon: corsetV2Icon, sprite: corsetV2, price: 600 }],
-  ["Green corset", { icon: greenCorsetIcon, sprite: greenCorset, price: 600 }],
-  ["Green corset v2", { icon: greenCorsetV2Icon, sprite: greenCorsetV2, price: 600 }],
-  ["Green panties and bra", { icon: greenPantiesAndBraIcon, sprite: greenPantiesAndBra, price: 500 }],
-  ["Green socks", { icon: greenSocksIcon, sprite: greenSocks, price: 400 }],
-  ["Orange corset", { icon: orangeCorsetIcon, sprite: orangeCorset, price: 600 }],
-  ["Orange corset v2", { icon: orangeCorsetV2Icon, sprite: orangeCorsetV2, price: 600 }],
-  ["Orange panties and bra", { icon: orangePantiesAndBraIcon, sprite: orangePantiesAndBra, price: 500 }],
-  ["Orange socks", { icon: orangeSocksIcon, sprite: orangeSocks, price: 400 }],
-  ["Purple corset", { icon: purpleCorsetIcon, sprite: purpleCorset, price: 600 }],
-  ["Purple corset v2", { icon: purpleCorsetV2Icon, sprite: purpleCorsetV2, price: 600 }],
-  ["Purple panties and bra", { icon: purplePantiesAndBraIcon, sprite: purplePantiesAndBra, price: 500 }],
-  ["Purple socks", { icon: purpleSocksIcon, sprite: purpleSocks, price: 400 }],
-  ["Red panties and bra", { icon: redPantiesAndBraIcon, sprite: redPantiesAndBra, price: 500 }],
-  ["Red socks", { icon: redSocksIcon, sprite: redSocks, price: 400 }],
-  ["Skirt", { icon: skirtIcon, sprite: skirt, price: 700 }],
-  ["Sky blue panties and bra", { icon: skybluePantiesAndBraIcon, sprite: skybluePantiesAndBra, price: 500 }],
-  ["Sky blue socks", { icon: skyblueSocksIcon, sprite: skyblueSocks, price: 400 }],
-  ["Socks", { icon: socksIcon, sprite: socks, price: 400 }]
-]);
+export const maleHair: Record<maleHairAssetKeys, Asset> = {
+  "Black hair": { icon: mBlackHairIcon, sprite: mBlackHair },
+  "Blonde hair": { icon: mBlondeHairIcon, sprite: mBlondeHair },
+  "Brown hair": { icon: mBrownHairIcon, sprite: mBrownHair },
+  "Golden hair": { icon: mGoldenHairIcon, sprite: mGoldenHair },
+  "Red hair": { icon: mRedHairIcon, sprite: mRedHair }
+};
 
-export const femaleHair = new Map<string, Asset>([
-  ["Black hair", { icon: fBlackHairIcon, sprite: fBlackHair }],
-  ["Blonde hair", { icon: fBlondeHairIcon, sprite: fBlondeHair }],
-  ["Brown hair", { icon: fBrownHairIcon, sprite: fBrownHair }],
-  ["Golden hair", { icon: fGoldenHairIcon, sprite: fGoldenHair }],
-  ["Red hair", { icon: fRedHairIcon, sprite: fRedHair }],
-]);
+// === MALE TOP CLOTHING ===
+type maleTopClothingAssetKeys =
+  | "Blue shirt"
+  | "Green shirt"
+  | "Orange shirt"
+  | "Purple shirt"
+  | "Shirt"
+  | "Shirt v2";
 
-export const femaleHand = new Map<string, Asset>([
-  ["Basket", { icon: basketIcon, sprite: basket, price: 800 }],
-  ["Bronze axe", { icon: fBronzeAxeIcon, sprite: fBronzeAxe, price: 500 }],
-  ["Bronze pickaxe", { icon: fBronzePickaxeIcon, sprite: fBronzePickaxe, price: 500 }],
-  ["Bronze sword", { icon: fBronzeSwordIcon, sprite: fBronzeSword, price: 500 }],
-  ["Diamond axe", { icon: fDiamondAxeIcon, sprite: fDiamondAxe, price: 800 }],
-  ["Diamond pickaxe", { icon: fDiamondPickaxeIcon, sprite: fDiamondPickaxe, price: 800 }],
-  ["Diamond sword", { icon: fDiamondSwordIcon, sprite: fDiamondSword, price: 800 }],
-  ["Flower", { icon: flowerIcon, sprite: flower, price: 800 }],
-  ["Golden axe", { icon: fGoldenAxeIcon, sprite: fGoldenAxe, price: 600 }],
-  ["Golden pickaxe", { icon: fGoldenPickaxeIcon, sprite: fGoldenPickaxe, price: 600 }],
-  ["Golden sword", { icon: fGoldenSwordIcon, sprite: fGoldenSword, price: 600 }],
-  ["Hoe F", { icon: hoeFIcon, sprite: hoeF, price: 300 }],
-  ["Iron axe", { icon: fIronAxeIcon, sprite: fIronAxe, price: 500 }],
-  ["Iron pickaxe", { icon: fIronPickaxeIcon, sprite: fIronPickaxe, price: 500 }],
-  ["Iron sword", { icon: fIronSwordIcon, sprite: fIronSword, price: 500 }],
-  ["Stick", { icon: fStickIcon, sprite: fStick, price: 100 }],
-  ["Sword", { icon: fSwordIcon, sprite: fSword, price: 400 }],
-  ["Wooden axe", { icon: fWoodenAxeIcon, sprite: fWoodenAxe, price: 400 }],
-  ["Wooden pickaxe", { icon: fWoodenPickaxeIcon, sprite: fWoodenPickaxe, price: 400 }],
-  ["Wooden sword", { icon: fWoodenSwordIcon, sprite: fWoodenSword, price: 400 }]
-]);
+export const maleTopClothing: Record<maleTopClothingAssetKeys, Asset> = {
+  "Blue shirt": { icon: blueShirtIcon, sprite: blueShirt, price: 500 },
+  "Green shirt": { icon: greenShirtIcon, sprite: greenShirt, price: 500 },
+  "Orange shirt": { icon: orangeShirtIcon, sprite: orangeShirt, price: 500 },
+  "Purple shirt": { icon: purpleShirtIcon, sprite: purpleShirt, price: 500 },
+  "Shirt": { icon: shirtIcon, sprite: shirt, price: 500 },
+  "Shirt v2": { icon: shirtV2Icon, sprite: shirtV2, price: 500 }
+};
 
-export const femaleSkin = new Map<string, string>([
-  ["Bronze skin", fBronzeSkin],
-  ["Ivory skin", fIvorySkin],
-  ["Onyx skin", fOnyxSkin],
-  ["Sandstone skin", fSandstoneSkin],
-  ["Umber skin", fUmberSkin]
-]);
+// === MALE BOTTOM CLOTHING ===
+type maleBottomClothingAssetKeys =
+  | "Blue pants"
+  | "Green pants"
+  | "Green underwear"
+  | "Orange pants"
+  | "Orange underwear"
+  | "Pants"
+  | "Purple pants"
+  | "Purple underwear"
+  | "Red underwear"
+  | "Sky blue underwear"
+  | "Underwear";
 
-export const petCompanions = new Map<string, Asset>([
-  ["Dog backpack", { icon: dogBackpackIcon, sprite: dogBackpack, price: 1500 }],
-  ["Dog hat", { icon: dogHatIcon, sprite: dogHat, price: 1500 }],
-  ["Ember the fox", { icon: emberTheFoxIcon, sprite: emberTheFox }],
-  ["Luna", { icon: lunaIcon, sprite: luna, price: 3000 }],
-  ["Maple", { icon: mapleIcon, sprite: maple, price: 3000 }],
-  ["Milo", { icon: miloIcon, sprite: milo, price: 3000 }],
-  ["Nova", { icon: novaIcon, sprite: nova, price: 3000 }],
-  ["Rusty", { icon: rustyIcon, sprite: rusty, price: 3000 }]
-]);
+export const maleBottomClothing: Record<maleBottomClothingAssetKeys, Asset> = {
+  "Blue pants": { icon: bluePantsIcon, sprite: bluePants, price: 500 },
+  "Green pants": { icon: greenPantsIcon, sprite: greenPants, price: 500 },
+  "Green underwear": { icon: greenUnderwearIcon, sprite: greenUnderwear, price: 300 },
+  "Orange pants": { icon: orangePantsIcon, sprite: orangePants, price: 500 },
+  "Orange underwear": { icon: orangeUnderwearIcon, sprite: orangeUnderwear, price: 300 },
+  "Pants": { icon: pantsIcon, sprite: pants, price: 500 },
+  "Purple pants": { icon: purplePantsIcon, sprite: purplePants, price: 500 },
+  "Purple underwear": { icon: purpleUnderwearIcon, sprite: purpleUnderwear, price: 300 },
+  "Red underwear": { icon: redUnderwearIcon, sprite: redUnderwear, price: 300 },
+  "Sky blue underwear": { icon: skyblueUnderwearIcon, sprite: skyblueUnderwear, price: 300 },
+  "Underwear": { icon: underwearIcon, sprite: underwear, price: 300 }
+};
+
+// === MALE FOOTWEAR ===
+type maleFootwearAssetKeys =
+  | "Boots"
+  | "Shoes";
+
+export const maleFootwear: Record<maleFootwearAssetKeys, Asset> = {
+  "Boots": { icon: mBootsIcon, sprite: mBoots, price: 800 },
+  "Shoes": { icon: shoesIcon, sprite: shoes, price: 300 }
+};
+
+// === MALE SKIN ===
+type maleSkinAssetKeys =
+  | "Bronze skin"
+  | "Ivory skin"
+  | "Onyx skin"
+  | "Sandstone skin"
+  | "Umber skin";
+
+export const maleSkin: Record<maleSkinAssetKeys, string> = {
+  "Bronze skin": mBronzeSkin,
+  "Ivory skin": mIvorySkin,
+  "Onyx skin": mOnyxSkin,
+  "Sandstone skin": mSandstoneSkin,
+  "Umber skin": mUmberSkin
+};
+
+// === FEMALE OUTFIT ===
+type femaleOutfitAssetKeys =
+  | "Blue corset"
+  | "Blue corset v2"
+  | "Blue panties and bra"
+  | "Corset"
+  | "Corset v2"
+  | "Green corset"
+  | "Green corset v2"
+  | "Green panties and bra"
+  | "Orange corset"
+  | "Orange corset v2"
+  | "Orange panties and bra"
+  | "Purple corset"
+  | "Purple corset v2"
+  | "Purple panties and bra"
+  | "Red panties and bra"
+  | "Sky blue panties and bra";
+
+export const femaleOutfit: Record<femaleOutfitAssetKeys, Asset> = {
+  "Blue corset": { icon: blueCorsetIcon, sprite: blueCorset, price: 600 },
+  "Blue corset v2": { icon: blueCorsetV2Icon, sprite: blueCorsetV2, price: 600 },
+  "Blue panties and bra": { icon: bluePantiesAndBraIcon, sprite: bluePantiesAndBra, price: 500 },
+  "Corset": { icon: corsetIcon, sprite: corset, price: 600 },
+  "Corset v2": { icon: corsetV2Icon, sprite: corsetV2, price: 600 },
+  "Green corset": { icon: greenCorsetIcon, sprite: greenCorset, price: 600 },
+  "Green corset v2": { icon: greenCorsetV2Icon, sprite: greenCorsetV2, price: 600 },
+  "Green panties and bra": { icon: greenPantiesAndBraIcon, sprite: greenPantiesAndBra, price: 500 },
+  "Orange corset": { icon: orangeCorsetIcon, sprite: orangeCorset, price: 600 },
+  "Orange corset v2": { icon: orangeCorsetV2Icon, sprite: orangeCorsetV2, price: 600 },
+  "Orange panties and bra": { icon: orangePantiesAndBraIcon, sprite: orangePantiesAndBra, price: 500 },
+  "Purple corset": { icon: purpleCorsetIcon, sprite: purpleCorset, price: 600 },
+  "Purple corset v2": { icon: purpleCorsetV2Icon, sprite: purpleCorsetV2, price: 600 },
+  "Purple panties and bra": { icon: purplePantiesAndBraIcon, sprite: purplePantiesAndBra, price: 500 },
+  "Red panties and bra": { icon: redPantiesAndBraIcon, sprite: redPantiesAndBra, price: 500 },
+  "Sky blue panties and bra": { icon: skybluePantiesAndBraIcon, sprite: skybluePantiesAndBra, price: 500 }
+};
+
+type femaleSkirtKeys = "Skirt"
+
+export const femaleSkirt: Record<femaleSkirtKeys, Asset> = {
+  "Skirt": { icon: skirtIcon, sprite: skirt, price: 700 }
+};
+
+// === FEMALE FOOTWEAR ===
+type femaleFootwearAssetKeys =
+  | "Boots"
+  | "Green socks"
+  | "Orange socks"
+  | "Purple socks"
+  | "Red socks"
+  | "Sky blue socks"
+  | "Socks";
+
+export const femaleFootwear: Record<femaleFootwearAssetKeys, Asset> = {
+  "Boots": { icon: fBootsIcon, sprite: fBoots, price: 500 },
+  "Green socks": { icon: greenSocksIcon, sprite: greenSocks, price: 400 },
+  "Orange socks": { icon: orangeSocksIcon, sprite: orangeSocks, price: 400 },
+  "Purple socks": { icon: purpleSocksIcon, sprite: purpleSocks, price: 400 },
+  "Red socks": { icon: redSocksIcon, sprite: redSocks, price: 400 },
+  "Sky blue socks": { icon: skyblueSocksIcon, sprite: skyblueSocks, price: 400 },
+  "Socks": { icon: socksIcon, sprite: socks, price: 400 }
+};
+
+// === FEMALE HAIR ===
+type femaleHairAssetKeys =
+  | "Black hair"
+  | "Blonde hair"
+  | "Brown hair"
+  | "Golden hair"
+  | "Red hair";
+
+export const femaleHair: Record<femaleHairAssetKeys, Asset> = {
+  "Black hair": { icon: fBlackHairIcon, sprite: fBlackHair },
+  "Blonde hair": { icon: fBlondeHairIcon, sprite: fBlondeHair },
+  "Brown hair": { icon: fBrownHairIcon, sprite: fBrownHair },
+  "Golden hair": { icon: fGoldenHairIcon, sprite: fGoldenHair },
+  "Red hair": { icon: fRedHairIcon, sprite: fRedHair }
+};
+
+// === FEMALE HAND ===
+type femaleHandAssetKeys =
+  | "Basket"
+  | "Bronze axe"
+  | "Bronze pickaxe"
+  | "Bronze sword"
+  | "Diamond axe"
+  | "Diamond pickaxe"
+  | "Diamond sword"
+  | "Flower"
+  | "Golden axe"
+  | "Golden pickaxe"
+  | "Golden sword"
+  | "Hoe F"
+  | "Iron axe"
+  | "Iron pickaxe"
+  | "Iron sword"
+  | "Stick"
+  | "Sword"
+  | "Wooden axe"
+  | "Wooden pickaxe"
+  | "Wooden sword";
+
+export const femaleHand: Record<femaleHandAssetKeys, Asset> = {
+  "Basket": { icon: basketIcon, sprite: basket, price: 800 },
+  "Bronze axe": { icon: fBronzeAxeIcon, sprite: fBronzeAxe, price: 500 },
+  "Bronze pickaxe": { icon: fBronzePickaxeIcon, sprite: fBronzePickaxe, price: 500 },
+  "Bronze sword": { icon: fBronzeSwordIcon, sprite: fBronzeSword, price: 500 },
+  "Diamond axe": { icon: fDiamondAxeIcon, sprite: fDiamondAxe, price: 800 },
+  "Diamond pickaxe": { icon: fDiamondPickaxeIcon, sprite: fDiamondPickaxe, price: 800 },
+  "Diamond sword": { icon: fDiamondSwordIcon, sprite: fDiamondSword, price: 800 },
+  "Flower": { icon: flowerIcon, sprite: flower, price: 800 },
+  "Golden axe": { icon: fGoldenAxeIcon, sprite: fGoldenAxe, price: 600 },
+  "Golden pickaxe": { icon: fGoldenPickaxeIcon, sprite: fGoldenPickaxe, price: 600 },
+  "Golden sword": { icon: fGoldenSwordIcon, sprite: fGoldenSword, price: 600 },
+  "Hoe F": { icon: hoeFIcon, sprite: hoeF, price: 300 },
+  "Iron axe": { icon: fIronAxeIcon, sprite: fIronAxe, price: 500 },
+  "Iron pickaxe": { icon: fIronPickaxeIcon, sprite: fIronPickaxe, price: 500 },
+  "Iron sword": { icon: fIronSwordIcon, sprite: fIronSword, price: 500 },
+  "Stick": { icon: fStickIcon, sprite: fStick, price: 100 },
+  "Sword": { icon: fSwordIcon, sprite: fSword, price: 400 },
+  "Wooden axe": { icon: fWoodenAxeIcon, sprite: fWoodenAxe, price: 400 },
+  "Wooden pickaxe": { icon: fWoodenPickaxeIcon, sprite: fWoodenPickaxe, price: 400 },
+  "Wooden sword": { icon: fWoodenSwordIcon, sprite: fWoodenSword, price: 400 }
+};
+
+// === FEMALE SKIN ===
+type femaleSkinAssetKeys =
+  | "Bronze skin"
+  | "Ivory skin"
+  | "Onyx skin"
+  | "Sandstone skin"
+  | "Umber skin";
+
+export const femaleSkin: Record<femaleSkinAssetKeys, string> = {
+  "Bronze skin": fBronzeSkin,
+  "Ivory skin": fIvorySkin,
+  "Onyx skin": fOnyxSkin,
+  "Sandstone skin": fSandstoneSkin,
+  "Umber skin": fUmberSkin
+};
+
+// === PET COMPANIONS ===
+type petCompanionAssetKeys =
+  | "Dog backpack"
+  | "Dog hat"
+  | "Ember the fox"
+  | "Luna"
+  | "Maple"
+  | "Milo"
+  | "Nova"
+  | "Rusty";
+
+export const petCompanions: Record<petCompanionAssetKeys, Asset> = {
+  "Dog backpack": { icon: dogBackpackIcon, sprite: dogBackpack, price: 1500 },
+  "Dog hat": { icon: dogHatIcon, sprite: dogHat, price: 1500 },
+  "Ember the fox": { icon: emberTheFoxIcon, sprite: emberTheFox },
+  "Luna": { icon: lunaIcon, sprite: luna, price: 3000 },
+  "Maple": { icon: mapleIcon, sprite: maple, price: 3000 },
+  "Milo": { icon: miloIcon, sprite: milo, price: 3000 },
+  "Nova": { icon: novaIcon, sprite: nova, price: 3000 },
+  "Rusty": { icon: rustyIcon, sprite: rusty, price: 3000 }
+};

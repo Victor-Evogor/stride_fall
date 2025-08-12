@@ -285,7 +285,7 @@ import novaIcon from "./assets/character_assets/asset_icons/pets/nova.png"
 import rustyIcon from "./assets/character_assets/asset_icons/pets/rusty.png"
 
 // Asset interface
-interface Asset {
+export interface Asset {
   icon: string;
   sprite: string;
   price?: number

@@ -32,16 +32,57 @@ import {
   maleHand,
   petCompanions,
   femaleFootwear,
-  maleFootwear
+  maleFootwear,
+  type Asset
 } from "../assetMap";
 
-const CustomizationItem: FunctionComponent<{
+interface CustomizationItemPropsInterface {
   title: string;
   image?: string;
   price?: number;
   buyHandler?: MouseEventHandler<HTMLDivElement>;
-}> = ({ title, image, price, buyHandler }) => {
-  const [currentItemIndex, setCurrentItemIndex] = useState(0)
+  asset: Record<string, Asset>
+}
+
+const CustomizationItem = ({
+  title,
+  asset,
+}: CustomizationItemPropsInterface) => {
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  
+  // Create the full list with null at index 0
+  const assetKeys = Object.keys(asset);
+  const totalItems = assetKeys.length + 1; // +1 for the null item
+  
+  // Get current item based on index
+  let currentItem: Asset | null = null;
+  if (currentItemIndex > 0) {
+    const assetKey = assetKeys[currentItemIndex - 1];
+    currentItem = asset[assetKey];
+  }
+
+  useEffect(() => {
+    
+  }, [currentItemIndex])
+  
+  const handleLeftArrowClick: MouseEventHandler<HTMLImageElement> = () => {
+    setCurrentItemIndex((prevIndex) => {
+      const newIndex = prevIndex === 0 ? totalItems - 1 : prevIndex - 1;
+      return newIndex;
+    });
+  };
+  
+  const rightArrowClick: MouseEventHandler<HTMLImageElement> = () => {
+    setCurrentItemIndex((prevIndex) => {
+      const newIndex = (prevIndex + 1) % totalItems;
+      return newIndex;
+    });
+  };
+  
+  const buyHandler = () => {
+    // Handle purchase logic here
+  };
+  
   return (
     <div className="flex flex-col items-center">
       <div
@@ -62,7 +103,8 @@ const CustomizationItem: FunctionComponent<{
           {title}
         </span>
       </div>
-      <ArrowButtons>
+      
+      <ArrowButtons leftArrowClick={handleLeftArrowClick} rightArrowClick={rightArrowClick}>
         <div
           className="relative mb-2"
           style={{
@@ -74,22 +116,26 @@ const CustomizationItem: FunctionComponent<{
             height: "64px",
           }}
         >
-          {image ? (
+          {currentItem ? (
             <img
-              src={image}
-              alt={title}
-              className="absolute inset-0 w-full h-full object-cover"
+              src={currentItem.icon}
+              alt={currentItemIndex > 0 ? assetKeys[currentItemIndex - 1] : "empty"}
+              className="absolute inset-0 w-full h-full object-cover scale-x-[-1]"
               style={{
                 imageRendering: "pixelated",
                 transform: "scale(1.6)",
               }}
             />
-          ) : null}
+          ) : (
+            null
+          )}
         </div>
       </ArrowButtons>
-
-      {/* Price Button - only show if not owned */}
-      {price ? <PriceBox price={price} clickHandler={buyHandler!} /> : <></>}
+      
+      {/* Price Button - only show if item exists and has a price */}
+      {currentItem?.price && (
+        <PriceBox price={currentItem.price} clickHandler={buyHandler} />
+      )}
     </div>
   );
 };
@@ -169,7 +215,7 @@ const ArrowButtons: FunctionComponent<
       <img
         src={leftArrow}
         alt="Left Arrow"
-        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4"
+        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4 z-10"
         style={{ imageRendering: "pixelated" }}
         onClick={leftArrowClick}
       />
@@ -177,7 +223,7 @@ const ArrowButtons: FunctionComponent<
       <img
         src={rightArrow}
         alt="Right Arrow"
-        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4"
+        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4 z-10"
         style={{ imageRendering: "pixelated" }}
         onClick={rightArrowClick}
       />
@@ -404,11 +450,11 @@ const CharacterMenu = () => {
   const maleAssetsCategory = [
     {
       title: "TOP",
-      assets: maleTopClothing,
+      asset: maleTopClothing,
     },
     {
       title: "BOTTOM",
-      assets: maleBottomClothing,
+      asset: maleBottomClothing,
     },
   ];
 
@@ -536,31 +582,30 @@ const CharacterMenu = () => {
               {/* HATS */}
               <CustomizationItem
                 title="HATS"
-                price={100}
-                buyHandler={() => ({})}
+                asset={hats}
               />
 
               {isMale &&
-                maleAssetsCategory.map((item) => (
-                  <CustomizationItem title={item.title} />
+                maleAssetsCategory.map((item, index) => (
+                  <CustomizationItem title={item.title} asset={item.asset} key={item.title + index}/>
                 ))}
 
               {isFemale &&
-                femaleAssetCategories.map((item) => (
-                  <CustomizationItem title={item.title} />
+                femaleAssetCategories.map((item, index) => (
+                  <CustomizationItem title={item.title} asset={item.asset} key={item.title + index}/>
                 ))}
 
               {/* FOOTWEAR */}
-              <CustomizationItem  title="footwear" />
+              <CustomizationItem  title="footwear" asset={isMale? maleFootwear : femaleFootwear}/>
 
               {/* HAND ITEM */}
-              <CustomizationItem  title="hand item" />
+              <CustomizationItem  title="hand item" asset={isMale? maleHand : femaleHand}/>
 
               {/* HAIR */}
-              <CustomizationItem title="hair" />
+              <CustomizationItem title="hair" asset={isMale ? maleHair : femaleHair}/>
 
               {/* PET ACCESSORIES */}
-              <CustomizationItem title="pet accessories" />
+              <CustomizationItem title="pet accessories" asset={petCompanions}/>
             </div>
           </div>
 

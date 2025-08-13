@@ -30,7 +30,7 @@ import {
   maleBottomClothing,
   maleHair,
   maleHand,
-  petCompanions,
+  petAccessories,
   femaleFootwear,
   maleFootwear,
   type Asset
@@ -62,8 +62,18 @@ const CustomizationItem = ({
   }
 
   useEffect(() => {
-    
-  }, [currentItemIndex])
+
+    window.dispatchEvent(new CustomEvent("customizationAction", {
+      detail: {
+        action: "updateCustomizationItem",
+        payload: {
+          currentItem: currentItem,
+          assetName: (currentItem ? assetKeys[currentItemIndex - 1] : null),
+          title: title.toLowerCase()
+        },
+      },
+    }))
+  }, [currentItem, assetKeys, currentItemIndex, title]);
   
   const handleLeftArrowClick: MouseEventHandler<HTMLImageElement> = () => {
     setCurrentItemIndex((prevIndex) => {
@@ -605,7 +615,7 @@ const CharacterMenu = () => {
               <CustomizationItem title="hair" asset={isMale ? maleHair : femaleHair}/>
 
               {/* PET ACCESSORIES */}
-              <CustomizationItem title="pet accessories" asset={petCompanions}/>
+              <CustomizationItem title="pet accessories" asset={petAccessories}/>
             </div>
           </div>
 

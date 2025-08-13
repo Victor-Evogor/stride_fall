@@ -33,7 +33,7 @@ import dogHat from "../assets/pet_companion/dog_hat.png";
 
 import { DEFAULT_CHARACTER } from "../constants"
 
-import assets from "../assetMap"
+import { femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing, petAccessories} from "../assetMap"
 
 
 
@@ -101,10 +101,43 @@ export class CharacterCustomizationScene extends Phaser.Scene{
     ["umberFemaleCharacter", umberFemaleCharacter],
   ];
   selectedCharacter: string = DEFAULT_CHARACTER
+  assets = [femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing]
+  clothing: {
+    hat: Phaser.GameObjects.Sprite | null,
+    footwear: Phaser.GameObjects.Sprite | null,
+    handItem: Phaser.GameObjects.Sprite | null,
+    hair: Phaser.GameObjects.Sprite | null,
+    fOutfit: Phaser.GameObjects.Sprite | null,
+    fSkirt: Phaser.GameObjects.Sprite | null,
+    mTop: Phaser.GameObjects.Sprite | null,
+    mBottom: Phaser.GameObjects.Sprite | null,
+  } = {
+    "hat": null,
+    "footwear": null,
+    "handItem": null,
+    "hair": null,
+    "fOutfit": null,
+    "fSkirt": null,
+    "mTop": null,
+    "mBottom": null,
+  }
 
   
   constructor(){
     super("CharacterCustomizationScene");
+  }
+
+  resetAllAnimations() {
+    if(!this.character) return
+    this.character.play(this.character.anims.getName())
+    Object.keys(this.clothing).forEach((key) => {
+      if(this.clothing[key as keyof typeof this.clothing]) {
+        const clothingItem = this.clothing[key as keyof typeof this.clothing];
+        if(clothingItem) {
+          clothingItem.play(`${clothingItem.texture.key}-idle`);
+        }
+      }
+    })
   }
 
   preload(): void {
@@ -113,8 +146,20 @@ export class CharacterCustomizationScene extends Phaser.Scene{
         frameWidth: 80,
         frameHeight: 64,
       });
-
     });
+
+    this.assets.forEach((assetMap) => {
+      Object.keys(assetMap).forEach(assetName => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sprite = (assetMap as any)[assetName].sprite
+        this.load.spritesheet(assetName, sprite, {
+          frameWidth: 80,
+          frameHeight: 64,
+        });
+      })
+    })
+
+    
   }
 
   create(){
@@ -131,6 +176,21 @@ export class CharacterCustomizationScene extends Phaser.Scene{
         frameRate: 6,
         repeat: -1,
       });
+    })
+
+    this.assets.forEach((assetMap) => {
+      Object.keys(assetMap).forEach(assetName => {
+        if(this.anims.exists(`${assetName}-idle`)) return; // Prevent duplicate animations
+        this.anims.create({
+          key: `${assetName}-idle`,
+          frames: this.anims.generateFrameNumbers(assetName, {
+            start: 0,
+            end: 3,
+          }),
+          frameRate: 6,
+          repeat: -1,
+        })
+      })
     })
 
     this.character.play(`${this.selectedCharacter}-idle`);
@@ -166,6 +226,97 @@ export class CharacterCustomizationScene extends Phaser.Scene{
             const newColor = payload.currentCharacterColor;
             const newCharacter = newColor + (this.character.anims.getName().includes("Male") ? "MaleCharacter-idle" : "FemaleCharacter-idle");
             this.character.play(newCharacter)
+            break;
+          }
+        
+        case "updateCustomizationItem":
+          {
+            const item = payload.currentItem;
+            const assetName= payload.assetName
+            const title = payload.title
+              if (title === "hats"){
+                if (this.clothing.hat){
+                  this.clothing.hat.destroy();
+                  this.clothing.hat = null;
+                }
+                // check if this.hat is already set
+                if(item){
+                this.clothing.hat = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).setDepth(5).play(`${assetName}-idle`);
+                this.resetAllAnimations()
+                }
+              } else if(title === "footwear"){
+                if (this.clothing.footwear){
+                  this.clothing.footwear.destroy();
+                  this.clothing.footwear = null;
+                }
+                if(item)
+                {
+                  this.clothing.footwear = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${assetName}-idle`);
+                  this.resetAllAnimations()
+                }
+              } else if(title === "outfit"){
+                if (this.clothing.fOutfit){
+                  this.clothing.fOutfit.destroy();
+                  this.clothing.fOutfit = null;
+                }
+                if(item)
+                {
+                  this.clothing.fOutfit = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${assetName}-idle`);
+                  this.resetAllAnimations()
+                }
+              } else if(title === "skirt"){
+                if (this.clothing.fSkirt){
+                  this.clothing.fSkirt.destroy();
+                  this.clothing.fSkirt = null;
+                }
+                if(item)
+                {
+                  this.clothing.fSkirt = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).setDepth(1).play(`${assetName}-idle`);
+                  this.resetAllAnimations()
+                }
+              }
+              else if(title === "hair"){
+                if (this.clothing.hair){
+                  this.clothing.hair.destroy();
+                  this.clothing.hair = null
+                }
+                if(item)
+                {
+                  this.clothing.hair = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${assetName}-idle`);
+                  this.resetAllAnimations()
+                }
+              }
+              else if(title === "hand item"){
+                if (this.clothing.handItem){
+                  this.clothing.handItem.destroy();
+                  this.clothing.handItem =  null;
+                }
+                if(item){
+                this.clothing.handItem = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).setDepth(5).play(`${assetName}-idle`);
+                this.resetAllAnimations()
+                }
+              } else if(title === "top"){
+                if(this.clothing.mTop){
+                  this.clothing.mTop.destroy();
+                  this.clothing.mTop = null;
+                }
+                if(item)
+                {
+                  this.clothing.mTop = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${assetName}-idle`);
+                  this.resetAllAnimations()
+                }
+              } else if(title === "bottom"){
+                if(this.clothing.mBottom){
+                  this.clothing.mBottom.destroy();
+                  this.clothing.mBottom = null;
+                }
+                if(item)
+                {
+                  this.clothing.mBottom = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${assetName}-idle`);
+                  this.resetAllAnimations()
+                }
+              }
+            
             break;
           }
         default:

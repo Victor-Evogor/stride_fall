@@ -610,8 +610,6 @@ export const femaleSkin: Record<femaleSkinAssetKeys, string> = {
 
 // === PET COMPANIONS ===
 type petCompanionAssetKeys =
-  | "Dog backpack"
-  | "Dog hat"
   | "Ember the fox"
   | "Luna"
   | "Maple"
@@ -620,8 +618,6 @@ type petCompanionAssetKeys =
   | "Rusty";
 
 export const petCompanions: Record<petCompanionAssetKeys, Asset> = {
-  "Dog backpack": { icon: dogBackpackIcon, sprite: dogBackpack, price: 1500 },
-  "Dog hat": { icon: dogHatIcon, sprite: dogHat, price: 1500 },
   "Ember the fox": { icon: emberTheFoxIcon, sprite: emberTheFox },
   "Luna": { icon: lunaIcon, sprite: luna, price: 3000 },
   "Maple": { icon: mapleIcon, sprite: maple, price: 3000 },
@@ -629,3 +625,12 @@ export const petCompanions: Record<petCompanionAssetKeys, Asset> = {
   "Nova": { icon: novaIcon, sprite: nova, price: 3000 },
   "Rusty": { icon: rustyIcon, sprite: rusty, price: 3000 }
 };
+
+type petAccessoriesAssetKeys = 
+| "Dog backpack"
+  | "Dog hat"
+
+export const petAccessories: Record<petAccessoriesAssetKeys, Asset> = {
+  "Dog backpack": { icon: dogBackpackIcon, sprite: dogBackpack, price: 1500 },
+  "Dog hat": { icon: dogHatIcon, sprite: dogHat, price: 1500 }
+}

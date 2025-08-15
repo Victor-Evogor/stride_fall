@@ -396,6 +396,10 @@ const CharacterMenu = () => {
   const isScenesMountedRef = useRef<boolean>(false);
 
   const [_, setCharacterSelectIndex] = useState(0);
+  const [characterColor, setCharacterColor] = useState({
+    male: "sandstone",
+    female: "sandstone"
+  })
 
   const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"];
 
@@ -501,6 +505,7 @@ const CharacterMenu = () => {
                 gender,
                 mClothing: mClothing,
                 fClothing: fClothing,
+                color: gender === "male" ? characterColor.male : characterColor.female
               },
             },
           })
@@ -522,6 +527,10 @@ const CharacterMenu = () => {
     setCharacterSelectIndex((prevIndex) => {
       if (prevIndex === 0) {
         const newIndex = characterColors.length - 1;
+        setCharacterColor((prevColor) => ({
+          ...prevColor,
+          [myGender]: characterColors[newIndex % characterColors.length],
+        }));
         window.dispatchEvent(
           new CustomEvent("customizationAction", {
             detail: {
@@ -536,6 +545,10 @@ const CharacterMenu = () => {
         return newIndex;
       } else {
         const newIndex = prevIndex - 1;
+        setCharacterColor((prevColor) => ({
+          ...prevColor,
+          [myGender]: characterColors[newIndex % characterColors.length],
+        }));
         window.dispatchEvent(
           new CustomEvent("customizationAction", {
             detail: {

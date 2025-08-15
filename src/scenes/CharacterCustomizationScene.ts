@@ -278,23 +278,17 @@ export class CharacterCustomizationScene extends Phaser.Scene{
         case "genderChange":
           { 
             const newGender = payload.gender;
-            const characterColor = this.character.anims.getName().includes("Male")?this.character.anims.getName().split("Male")[0]: this.character.anims.getName().split("Female")[0];
             const mClothing = payload.mClothing
             const fClothing = payload.fClothing
+            const characterColor = payload.color
             if(newGender === "male"){
               this.character.play(`${characterColor}MaleCharacter-idle`)
-              console.log("Clearing clothing")
               this.clearClothing()
-              console.log("putting on male clothing")
               this.putOnClothing(mClothing)
-              console.log("Successfuly put on male clothing, ", mClothing)
             } else if(newGender == "female"){
               this.character.play(`${characterColor}FemaleCharacter-idle`)
-              console.log("Clearing clothing")
               this.clearClothing()
-              console.log("Putting on female clothing\n", fClothing)
               this.putOnClothing(fClothing)
-              console.log("Successfully put on female clothing\n\n", fClothing)
             }
           break; 
         }

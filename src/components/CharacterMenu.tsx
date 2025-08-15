@@ -15,6 +15,11 @@ import {
   useRef,
   useState,
   useEffect,
+  createContext,
+  useContext,
+  useMemo,
+  type SetStateAction,
+  type Dispatch,
   type PropsWithChildren,
   type FunctionComponent,
   type MouseEventHandler,
@@ -33,27 +38,89 @@ import {
   petAccessories,
   femaleFootwear,
   maleFootwear,
-  type Asset
+  type Asset,
 } from "../assetMap";
+
+export interface mClothingType {
+  hat: string | null;
+  hair: string | null;
+  top: string | null;
+  bottom: string | null;
+  footwear: string | null;
+  handItem: string | null;
+}
+
+export interface fClothingType {
+  hat: string | null;
+  hair: string | null;
+  outfit: string | null;
+  skirt: string | null;
+  footwear: string | null;
+  handItem: string | null;
+}
+
+const clothingConfigContext = createContext<{
+  mClothing: mClothingType;
+  fClothing: fClothingType;
+  setMClothing: Dispatch<SetStateAction<mClothingType>>;
+  setFClothing: Dispatch<SetStateAction<fClothingType>>;
+  myGender: "male" | "female";
+  setMyGender: Dispatch<SetStateAction<"male" | "female">>;
+} | null>(null);
+
+const useClothingConfig = () => {
+  const context = useContext(clothingConfigContext);
+  if (!context) {
+    throw new Error(
+      "useClothingConfig must be used within a ClothingConfigProvider"
+    );
+  }
+  return context;
+};
 
 interface CustomizationItemPropsInterface {
   title: string;
   image?: string;
   price?: number;
   buyHandler?: MouseEventHandler<HTMLDivElement>;
-  asset: Record<string, Asset>
+  asset: Record<string, Asset>;
 }
 
 const CustomizationItem = ({
   title,
   asset,
 }: CustomizationItemPropsInterface) => {
-  const [currentItemIndex, setCurrentItemIndex] = useState(0);
+  const { myGender, mClothing, fClothing } = useClothingConfig();
+  const assetKeys = useMemo(() => Object.keys(asset), [asset]);
+
+  const getInitialIndex = () => {
+    let key = title.toLowerCase();
+    if (key === 'hats') {
+      key = 'hat';
+    } else if (key === 'hand item') {
+      key = 'handItem';
+    }
+
+    const clothing = myGender === 'male' ? mClothing : fClothing;
+    if (Object.prototype.hasOwnProperty.call(clothing, key)) {
+      const selectedAsset = clothing[key as keyof typeof clothing];
+      if (selectedAsset) {
+        const index = assetKeys.indexOf(selectedAsset);
+        if (index !== -1) {
+          return index + 1; // +1 for "None" at index 0
+        }
+      }
+    }
+    return 0;
+  };
+
+  const [currentItemIndex, setCurrentItemIndex] = useState(getInitialIndex);
+  const isInitialMount = useRef(true);
+  
   
   // Create the full list with null at index 0
-  const assetKeys = Object.keys(asset);
   const totalItems = assetKeys.length + 1; // +1 for the null item
-  
+
   // Get current item based on index
   let currentItem: Asset | null = null;
   if (currentItemIndex > 0) {
@@ -62,37 +129,45 @@ const CustomizationItem = ({
   }
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
 
-    window.dispatchEvent(new CustomEvent("customizationAction", {
-      detail: {
-        action: "updateCustomizationItem",
-        payload: {
-          currentItem: currentItem,
-          assetName: (currentItem ? assetKeys[currentItemIndex - 1] : null),
-          title: title.toLowerCase()
+    window.dispatchEvent(
+      new CustomEvent("customizationAction", {
+        detail: {
+          action: "updateCustomizationItem",
+          payload: {
+            currentItem: currentItem,
+            assetName: currentItem ? assetKeys[currentItemIndex - 1] : null,
+            title: title.toLowerCase(),
+          },
         },
-      },
-    }))
+      })
+    );
   }, [currentItem, assetKeys, currentItemIndex, title]);
+
   
+
   const handleLeftArrowClick: MouseEventHandler<HTMLImageElement> = () => {
     setCurrentItemIndex((prevIndex) => {
       const newIndex = prevIndex === 0 ? totalItems - 1 : prevIndex - 1;
       return newIndex;
     });
   };
-  
+
   const rightArrowClick: MouseEventHandler<HTMLImageElement> = () => {
     setCurrentItemIndex((prevIndex) => {
       const newIndex = (prevIndex + 1) % totalItems;
       return newIndex;
     });
   };
-  
+
   const buyHandler = () => {
     // Handle purchase logic here
   };
-  
+
   return (
     <div className="flex flex-col items-center">
       <div
@@ -113,8 +188,11 @@ const CustomizationItem = ({
           {title}
         </span>
       </div>
-      
-      <ArrowButtons leftArrowClick={handleLeftArrowClick} rightArrowClick={rightArrowClick}>
+
+      <ArrowButtons
+        leftArrowClick={handleLeftArrowClick}
+        rightArrowClick={rightArrowClick}
+      >
         <div
           className="relative mb-2"
           style={{
@@ -129,19 +207,19 @@ const CustomizationItem = ({
           {currentItem ? (
             <img
               src={currentItem.icon}
-              alt={currentItemIndex > 0 ? assetKeys[currentItemIndex - 1] : "empty"}
+              alt={
+                currentItemIndex > 0 ? assetKeys[currentItemIndex - 1] : "empty"
+              }
               className="absolute inset-0 w-full h-full object-cover scale-x-[-1]"
               style={{
                 imageRendering: "pixelated",
                 transform: "scale(1.6)",
               }}
             />
-          ) : (
-            null
-          )}
+          ) : null}
         </div>
       </ArrowButtons>
-      
+
       {/* Price Button - only show if item exists and has a price */}
       {currentItem?.price && (
         <PriceBox price={currentItem.price} clickHandler={buyHandler} />
@@ -316,6 +394,23 @@ const CharacterMenu = () => {
 
   const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"];
 
+  const [mClothing, setMClothing] = useState<mClothingType>({
+    hat: null,
+    hair: null,
+    top: null,
+    bottom: null,
+    footwear: null,
+    handItem: null,
+  });
+  const [fClothing, setFClothing] = useState<fClothingType>({
+    hat: null,
+    hair: null,
+    outfit: null,
+    skirt: null,
+    footwear: null,
+    handItem: null,
+  });
+
   const {
     setIsCharacterCustomizeMenuOpen,
     gameConfig: { characterGender, coins },
@@ -330,6 +425,66 @@ const CharacterMenu = () => {
     setIsCharacterCustomizeMenuOpen(false);
   };
 
+  useEffect(() => {
+    const handleCustomizationAction = (e: Event) => {
+      const event = e as CustomEvent;
+      const action = event.detail.action;
+      console.log("handleCustomizationAction fired");
+      if (action === "updateCustomizationItem") {
+        const title = event.detail.payload.title;
+        const assetName = event.detail.payload.assetName;
+        let key = title;
+        if (key === "hats") {
+          key = "hat";
+        } else if (key === "hand item") {
+          key = "handItem";
+        }
+
+        if (myGender === "male") {
+          setMClothing((prev) => {
+            if (Object.prototype.hasOwnProperty.call(prev, key)) {
+              return {
+                ...prev,
+                [key]: assetName,
+              };
+            }
+            return prev;
+          });
+        } else if (myGender === "female") {
+          setFClothing((prev) => {
+            if (Object.prototype.hasOwnProperty.call(prev, key)) {
+              return {
+                ...prev,
+                [key]: assetName,
+              };
+            }
+            return prev;
+          });
+        }
+      }
+    };
+    window.addEventListener(
+      "customizationAction",
+      handleCustomizationAction as EventListener
+    );
+    return () => {
+      window.removeEventListener(
+        "customizationAction",
+        handleCustomizationAction as EventListener
+      );
+    };
+  }, [myGender, setMClothing, setFClothing]);
+
+  useEffect(()=> {
+    console.log("female clothing changed")
+    console.log(fClothing)
+  }, [fClothing])
+
+  useEffect(() => {
+    console.log("Male clothing changed")
+    console.log(mClothing)
+  }, [mClothing])
+
   const handleGenderToggle = (gender: "male" | "female") => {
     if (gender !== myGender) {
       setMyGender(() => {
@@ -339,6 +494,8 @@ const CharacterMenu = () => {
               action: "genderChange",
               payload: {
                 gender,
+                mClothing: mClothing,
+                fClothing: fClothing,
               },
             },
           })
@@ -589,33 +746,54 @@ const CharacterMenu = () => {
 
             {/* RIGHT: Customization Options */}
             <div className="flex-1 grid grid-rows-3 grid-cols-3 gap-3">
-              {/* HATS */}
-              <CustomizationItem
-                title="HATS"
-                asset={hats}
-              />
+              <clothingConfigContext.Provider
+                value={{ mClothing, fClothing, setMClothing, setFClothing, myGender, setMyGender }}
+              >
+                {/* HATS */}
+                <CustomizationItem title="HATS" asset={hats} />
 
-              {isMale &&
-                maleAssetsCategory.map((item, index) => (
-                  <CustomizationItem title={item.title} asset={item.asset} key={item.title + index}/>
-                ))}
+                {isMale &&
+                  maleAssetsCategory.map((item, index) => (
+                    <CustomizationItem
+                      title={item.title}
+                      asset={item.asset}
+                      key={item.title + index}
+                    />
+                  ))}
 
-              {isFemale &&
-                femaleAssetCategories.map((item, index) => (
-                  <CustomizationItem title={item.title} asset={item.asset} key={item.title + index}/>
-                ))}
+                {isFemale &&
+                  femaleAssetCategories.map((item, index) => (
+                    <CustomizationItem
+                      title={item.title}
+                      asset={item.asset}
+                      key={item.title + index}
+                    />
+                  ))}
 
-              {/* FOOTWEAR */}
-              <CustomizationItem  title="footwear" asset={isMale? maleFootwear : femaleFootwear}/>
+                {/* FOOTWEAR */}
+                <CustomizationItem
+                  title="footwear"
+                  asset={isMale ? maleFootwear : femaleFootwear}
+                />
 
-              {/* HAND ITEM */}
-              <CustomizationItem  title="hand item" asset={isMale? maleHand : femaleHand}/>
+                {/* HAND ITEM */}
+                <CustomizationItem
+                  title="hand item"
+                  asset={isMale ? maleHand : femaleHand}
+                />
 
-              {/* HAIR */}
-              <CustomizationItem title="hair" asset={isMale ? maleHair : femaleHair}/>
+                {/* HAIR */}
+                <CustomizationItem
+                  title="hair"
+                  asset={isMale ? maleHair : femaleHair}
+                />
 
-              {/* PET ACCESSORIES */}
-              <CustomizationItem title="pet accessories" asset={petAccessories}/>
+                {/* PET ACCESSORIES */}
+                <CustomizationItem
+                  title="pet accessories"
+                  asset={petAccessories}
+                />
+              </clothingConfigContext.Provider>
             </div>
           </div>
 

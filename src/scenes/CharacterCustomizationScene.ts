@@ -35,6 +35,8 @@ import { DEFAULT_CHARACTER } from "../constants"
 
 import { femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing, petAccessories} from "../assetMap"
 
+import {type fClothingType, type mClothingType} from "../components/CharacterMenu"
+
 
 
 export class PetCustomizationScene extends Phaser.Scene{
@@ -140,6 +142,70 @@ export class CharacterCustomizationScene extends Phaser.Scene{
     })
   }
 
+  clearClothing(){
+    Object.keys(this.clothing).forEach((key) => {
+      if(this.clothing[key as keyof typeof this.clothing]){
+        const clothingItem = this.clothing[key as keyof typeof this.clothing];
+        if(clothingItem){
+          clothingItem.destroy();
+          this.clothing[key as keyof typeof this.clothing] = null;
+        }
+      }
+    })
+    this.clothing = {
+      "hat": null,
+      "footwear": null,
+      "handItem": null,
+      "hair": null,
+      "fOutfit": null,
+      "fSkirt": null,
+      "mTop": null,
+      "mBottom": null,
+    }
+  }
+
+  putOnClothing(clothing: mClothingType | fClothingType){
+    this.resetAllAnimations()
+    console.log("reset all animations")
+    console.log("Clothing keys", Object.keys(clothing))
+    Object.keys(clothing).forEach((key) => {
+      if(key === "hat" && clothing[key as keyof typeof clothing]){
+        this.clothing.hat = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).setDepth(5).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      } else if(key === "footwear" && clothing[key as keyof typeof clothing]){
+        this.clothing.footwear = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+
+      }
+      else if(key === "handItem" && clothing[key as keyof typeof clothing]){
+        this.clothing.handItem = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).setDepth(5).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+
+      } else if(key === "hair" && clothing[key as keyof typeof clothing]){
+        this.clothing.hair = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+
+      } else if(key === "outfit" && clothing[key as keyof typeof clothing]){
+        this.clothing.fOutfit = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+
+      } else if(key === "skirt" && clothing[key as keyof typeof clothing]){
+        this.clothing.fSkirt = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).setDepth(1).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+
+      } else if(key === "top" && clothing[key as keyof typeof clothing]){
+        this.clothing.mTop = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+
+      } else if(key === "bottom" && clothing[key as keyof typeof clothing]){
+        this.clothing.mBottom = this.add.sprite(32, -25, clothing[key as keyof typeof clothing]!, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+
+      }
+    })
+
+  }
+
   preload(): void {
     this.characters.forEach((character) => {
       this.load.spritesheet(character[0], character[1], {
@@ -212,11 +278,23 @@ export class CharacterCustomizationScene extends Phaser.Scene{
         case "genderChange":
           { 
             const newGender = payload.gender;
-            const characterColor = this.character.anims.getName().includes("Male")?this.character.anims.getName().split("Male")[0]: this.character.anims.getName().split("Female")[0]
+            const characterColor = this.character.anims.getName().includes("Male")?this.character.anims.getName().split("Male")[0]: this.character.anims.getName().split("Female")[0];
+            const mClothing = payload.mClothing
+            const fClothing = payload.fClothing
             if(newGender === "male"){
               this.character.play(`${characterColor}MaleCharacter-idle`)
+              console.log("Clearing clothing")
+              this.clearClothing()
+              console.log("putting on male clothing")
+              this.putOnClothing(mClothing)
+              console.log("Successfuly put on male clothing, ", mClothing)
             } else if(newGender == "female"){
               this.character.play(`${characterColor}FemaleCharacter-idle`)
+              console.log("Clearing clothing")
+              this.clearClothing()
+              console.log("Putting on female clothing\n", fClothing)
+              this.putOnClothing(fClothing)
+              console.log("Successfully put on female clothing\n\n", fClothing)
             }
           break; 
         }

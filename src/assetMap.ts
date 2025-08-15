@@ -380,18 +380,18 @@ export const maleHand: Record<maleHandAssetKeys, Asset> = {
 };
 
 type maleHairAssetKeys =
-  | "Black hair"
-  | "Blonde hair"
-  | "Brown hair"
-  | "Golden hair"
-  | "Red hair";
+  | "Male Black hair"
+  | "Male Blonde hair"
+  | "Male Brown hair"
+  | "Male Golden hair"
+  | "Male Red hair";
 
 export const maleHair: Record<maleHairAssetKeys, Asset> = {
-  "Black hair": { icon: mBlackHairIcon, sprite: mBlackHair },
-  "Blonde hair": { icon: mBlondeHairIcon, sprite: mBlondeHair },
-  "Brown hair": { icon: mBrownHairIcon, sprite: mBrownHair },
-  "Golden hair": { icon: mGoldenHairIcon, sprite: mGoldenHair },
-  "Red hair": { icon: mRedHairIcon, sprite: mRedHair }
+  "Male Black hair": { icon: mBlackHairIcon, sprite: mBlackHair },
+  "Male Blonde hair": { icon: mBlondeHairIcon, sprite: mBlondeHair },
+  "Male Brown hair": { icon: mBrownHairIcon, sprite: mBrownHair },
+  "Male Golden hair": { icon: mGoldenHairIcon, sprite: mGoldenHair },
+  "Male Red hair": { icon: mRedHairIcon, sprite: mRedHair }
 };
 
 // === MALE TOP CLOTHING ===
@@ -532,18 +532,18 @@ export const femaleFootwear: Record<femaleFootwearAssetKeys, Asset> = {
 
 // === FEMALE HAIR ===
 type femaleHairAssetKeys =
-  | "Black hair"
-  | "Blonde hair"
-  | "Brown hair"
-  | "Golden hair"
-  | "Red hair";
+  | "Female Black hair"
+  | "Female Blonde hair"
+  | "Female Brown hair"
+  | "Female Golden hair"
+  | "Female Red hair";
 
 export const femaleHair: Record<femaleHairAssetKeys, Asset> = {
-  "Black hair": { icon: fBlackHairIcon, sprite: fBlackHair },
-  "Blonde hair": { icon: fBlondeHairIcon, sprite: fBlondeHair },
-  "Brown hair": { icon: fBrownHairIcon, sprite: fBrownHair },
-  "Golden hair": { icon: fGoldenHairIcon, sprite: fGoldenHair },
-  "Red hair": { icon: fRedHairIcon, sprite: fRedHair }
+  "Female Black hair": { icon: fBlackHairIcon, sprite: fBlackHair },
+  "Female Blonde hair": { icon: fBlondeHairIcon, sprite: fBlondeHair },
+  "Female Brown hair": { icon: fBrownHairIcon, sprite: fBrownHair },
+  "Female Golden hair": { icon: fGoldenHairIcon, sprite: fGoldenHair },
+  "Female Red hair": { icon: fRedHairIcon, sprite: fRedHair }
 };
 
 // === FEMALE HAND ===

@@ -304,6 +304,7 @@ export class CharacterCustomizationScene extends Phaser.Scene{
             const newColor = payload.currentCharacterColor;
             const newCharacter = newColor + (this.character.anims.getName().includes("Male") ? "MaleCharacter-idle" : "FemaleCharacter-idle");
             this.character.play(newCharacter)
+            this.resetAllAnimations()
             break;
           }
         

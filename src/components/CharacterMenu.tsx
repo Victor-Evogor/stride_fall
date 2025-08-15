@@ -18,6 +18,7 @@ import {
   createContext,
   useContext,
   useMemo,
+  useCallback,
   type SetStateAction,
   type Dispatch,
   type PropsWithChildren,
@@ -93,7 +94,7 @@ const CustomizationItem = ({
   const { myGender, mClothing, fClothing } = useClothingConfig();
   const assetKeys = useMemo(() => Object.keys(asset), [asset]);
 
-  const getInitialIndex = () => {
+  const getInitialIndex = useCallback(() => {
     let key = title.toLowerCase();
     if (key === 'hats') {
       key = 'hat';
@@ -112,9 +113,13 @@ const CustomizationItem = ({
       }
     }
     return 0;
-  };
+  }, [ assetKeys, fClothing, mClothing,myGender, title]);
 
-  const [currentItemIndex, setCurrentItemIndex] = useState(getInitialIndex);
+  useEffect(()=> {
+    setCurrentItemIndex(getInitialIndex());
+  }, [asset, getInitialIndex])
+
+  const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const isInitialMount = useRef(true);
   
   
@@ -750,7 +755,8 @@ const CharacterMenu = () => {
                 value={{ mClothing, fClothing, setMClothing, setFClothing, myGender, setMyGender }}
               >
                 {/* HATS */}
-                <CustomizationItem title="HATS" asset={hats} />
+                {isMale? <CustomizationItem title="HATS" asset={hats} /> : <CustomizationItem title="HATS" asset={hats} />}
+                
 
                 {isMale &&
                   maleAssetsCategory.map((item, index) => (
@@ -771,22 +777,34 @@ const CharacterMenu = () => {
                   ))}
 
                 {/* FOOTWEAR */}
-                <CustomizationItem
+                {isMale? <CustomizationItem
                   title="footwear"
-                  asset={isMale ? maleFootwear : femaleFootwear}
-                />
+                  asset={maleFootwear}
+                /> : <CustomizationItem
+                title="footwear"
+                asset={femaleFootwear}
+              />}
+                
 
                 {/* HAND ITEM */}
-                <CustomizationItem
+                {isMale ? <CustomizationItem
                   title="hand item"
-                  asset={isMale ? maleHand : femaleHand}
-                />
+                  asset={maleHand}
+                /> : <CustomizationItem
+                title="hand item"
+                asset={femaleHand}
+              />}
+                
 
                 {/* HAIR */}
-                <CustomizationItem
+                {isMale ? <CustomizationItem
                   title="hair"
-                  asset={isMale ? maleHair : femaleHair}
-                />
+                  asset={maleHair}
+                /> : <CustomizationItem
+                title="hair"
+                asset={femaleHair}
+              />}
+                
 
                 {/* PET ACCESSORIES */}
                 <CustomizationItem

@@ -27,64 +27,129 @@ import rusty from "../assets/pet_companion/rusty.png";
 // foxs
 import ember from "../assets/pet_companion/ember_the_fox.png";
 
-// pet accessories
-import dogBackpack from "../assets/pet_companion/dog_backpack.png";
-import dogHat from "../assets/pet_companion/dog_hat.png";
-
 import { DEFAULT_CHARACTER } from "../constants"
 
-import { femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing, petAccessories} from "../assetMap"
+import { femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing, petAccessories, type PetAccessoriesAssetKeys} from "../assetMap"
 
 import {type fClothingType, type mClothingType} from "../components/CharacterMenu"
 
 
 
 export class PetCustomizationScene extends Phaser.Scene{
+  character: Phaser.GameObjects.Sprite | null = null
+  pets: [string, string][]= [
+    ["Luna", luna],
+    ["Maple", maple],
+    ["Milo", milo],
+    ["Nova", nova],
+    ["Rusty", rusty],
+    ["Ember the fox", ember]
+  ]
+  currentAccessory: Phaser.GameObjects.Sprite | null = null
+
+
   constructor(){
     super("PetCustomizationScene");
   }
 
   preload(){
-    [
-      ["luna", luna],
-      ["maple", maple],
-      ["milo", milo],
-      ["nova", nova],
-      ["rusty", rusty],
-      ["ember", ember],
-      ["dogBackPack", dogBackpack],
-      ["dogHat", dogHat],
-    ].forEach((pet) => {
+    this.pets.forEach((pet) => {
       this.load.spritesheet(pet[0], pet[1], {
         frameWidth: 32,
         frameHeight: 32,
       });
     });
+    Object.keys(petAccessories).forEach(key => {
+      this.load.spritesheet(key, petAccessories[key as PetAccessoriesAssetKeys].sprite, {
+        frameWidth: 32,
+        frameHeight: 32,
+      })
+    })
   }
 
   create(){
     
-    const pet = this.add.sprite(30, -16, "luna", 0);
-    this.anims.create({
-      key: "luna-idle",
-      frames: this.anims.generateFrameNumbers("luna", {
-        start: 0,
-        end: 3,
-      }),
-      frameRate: 6,
-      repeat: -1,
+    this.character = this.add.sprite(30, -16, "luna", 0);
+    this.pets.forEach((pet) => {
+      this.anims.create({
+        key: `${pet[0]}-idle`,
+        frames: this.anims.generateFrameNumbers(pet[0], {
+          start: 0,
+          end: 4,
+        }),
+        frameRate: 6,
+        repeat: -1,
+      });
     });
-    pet.play("luna-idle");
-    pet.setScale(1.8);
-    pet.setOrigin(0.5, 0);
+
+    Object.keys(petAccessories).forEach(key => {
+      if(this.anims.exists(`${key}-idle`)) return; // Prevent duplicate animations
+      this.anims.create({
+        key: `${key}-idle`,
+        frames: this.anims.generateFrameNumbers(key, {
+          start: 0,
+          end: 4,
+        }),
+        frameRate: 6,
+        repeat: -1,
+      })
+    })
+    
+    this.character.play("Luna-idle");
+    this.character.setScale(1.8);
+    this.character.setOrigin(0.5, 0);
 
     const handleCustomizationAction: EventListenerOrEventListenerObject = (event) => {
+      if(!this.character){
+        console.error("Error: Character not initialized")
+        return
+      }
+      const action = (event as CustomEvent).detail.action
+      const payload = (event as CustomEvent).detail.payload
+      console.log(payload)
+      switch (action) {
+        case "characterChange":
+          {
+          const character = payload.character;
+          this.character.play(`${character}-idle`)
+          break;
+        }
+      
+        case "updateAccessory":
+        {
+          const assetName = payload.assetName
+          const item = payload.currentItem;
+          if (this.currentAccessory){
+            this.currentAccessory.destroy();
+            this.currentAccessory = null;
+          }
 
+          if(item){
+            this.currentAccessory = this.add.sprite(30, -16, assetName, 0).setScale(1.8).setOrigin(0.5, 0).play(`${assetName}-idle`);
+            this.resetAllAnimations()
+          }
+
+
+          break;
+        }
+        default:
+          break;
+      }
     }
 
+    window.addEventListener("petCustomizationAction", handleCustomizationAction)
+
     this.events.once("destroy", ()=> {
-      window.removeEventListener("customizationAction",handleCustomizationAction)
+      window.removeEventListener("petCustomizationAction",handleCustomizationAction)
     })
+  }
+
+  resetAllAnimations(){
+    if(!this.character) return
+    this.character.play(this.character.anims.getName())
+    if(this.currentAccessory){
+      this.currentAccessory.play(`${this.currentAccessory.anims.getName()}-idle`)
+    }
   }
 }
 
@@ -237,7 +302,7 @@ export class CharacterCustomizationScene extends Phaser.Scene{
         key: `${character[0]}-idle`,
         frames: this.anims.generateFrameNumbers(character[0], {
           start: 0,
-          end: 3,
+          end: 4,
         }),
         frameRate: 6,
         repeat: -1,
@@ -251,7 +316,7 @@ export class CharacterCustomizationScene extends Phaser.Scene{
           key: `${assetName}-idle`,
           frames: this.anims.generateFrameNumbers(assetName, {
             start: 0,
-            end: 3,
+            end: 4,
           }),
           frameRate: 6,
           repeat: -1,

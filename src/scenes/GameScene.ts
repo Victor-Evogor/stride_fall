@@ -334,7 +334,7 @@ class GameScene extends Phaser.Scene {
       key: `${character}-idle`,
       frames: this.anims.generateFrameNumbers(character, {
         start: 0,
-        end: 3,
+        end: 4,
       }),
       frameRate: 6,
       repeat: -1,

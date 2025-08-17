@@ -39,6 +39,7 @@ import {
   petAccessories,
   femaleFootwear,
   maleFootwear,
+  petCompanions,
   type Asset,
 } from "../assetMap";
 
@@ -116,8 +117,9 @@ const CustomizationItem = ({
   }, [ assetKeys, fClothing, mClothing,myGender, title]);
 
   useEffect(()=> {
+  if(title !== "pet accessories")
     setCurrentItemIndex(getInitialIndex());
-  }, [asset, getInitialIndex])
+  }, [asset, getInitialIndex, title])
 
   const [currentItemIndex, setCurrentItemIndex] = useState(0);
   const isInitialMount = useRef(true);
@@ -138,7 +140,7 @@ const CustomizationItem = ({
       isInitialMount.current = false;
       return;
     }
-
+    if(title !== "pet accessories"){
     window.dispatchEvent(
       new CustomEvent("customizationAction", {
         detail: {
@@ -151,15 +153,29 @@ const CustomizationItem = ({
         },
       })
     );
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("petCustomizationAction", {
+          detail: {
+            action: "updateAccessory",
+            payload: {
+              currentItem: currentItem,
+              assetName: currentItem ? assetKeys[currentItemIndex - 1] : null,
+            }
+          }
+        })
+      )
+    }
   }, [currentItem, assetKeys, currentItemIndex, title]);
 
   
 
   const handleLeftArrowClick: MouseEventHandler<HTMLImageElement> = () => {
-    setCurrentItemIndex((prevIndex) => {
-      const newIndex = prevIndex === 0 ? totalItems - 1 : prevIndex - 1;
-      return newIndex;
-    });
+      setCurrentItemIndex((prevIndex) => {
+        const newIndex = prevIndex === 0 ? totalItems - 1 : prevIndex - 1;
+        return newIndex;
+      });
+    
   };
 
   const rightArrowClick: MouseEventHandler<HTMLImageElement> = () => {
@@ -395,11 +411,12 @@ const CharacterMenu = () => {
   const petCustomizationRef = useRef<HTMLDivElement>(null);
   const isScenesMountedRef = useRef<boolean>(false);
 
-  const [_, setCharacterSelectIndex] = useState(0);
+  const  setCharacterSelectIndex = useState(0)[1];
   const [characterColor, setCharacterColor] = useState({
     male: "sandstone",
     female: "sandstone"
   })
+  const setPetSelectIndex = useState(0)[1]
 
   const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"];
 
@@ -484,15 +501,6 @@ const CharacterMenu = () => {
     };
   }, [myGender, setMClothing, setFClothing]);
 
-  useEffect(()=> {
-    console.log("female clothing changed")
-    console.log(fClothing)
-  }, [fClothing])
-
-  useEffect(() => {
-    console.log("Male clothing changed")
-    console.log(mClothing)
-  }, [mClothing])
 
   const handleGenderToggle = (gender: "male" | "female") => {
     if (gender !== myGender) {
@@ -568,6 +576,10 @@ const CharacterMenu = () => {
   const handleCharacterSpriteRightArrowClick = () => {
     setCharacterSelectIndex((prevIndex) => {
       const newIndex = prevIndex + 1;
+      setCharacterColor((prevColor) => ({
+        ...prevColor,
+        [myGender]: characterColors[newIndex % characterColors.length],
+      }));
       window.dispatchEvent(
         new CustomEvent("customizationAction", {
           detail: {
@@ -582,6 +594,57 @@ const CharacterMenu = () => {
       return newIndex;
     });
   };
+
+  const handlePetSpriteRightArrowClick = () => {
+    setPetSelectIndex((prevIndex) => {
+      const newIndex = prevIndex + 1;
+      window.dispatchEvent(
+        new CustomEvent("petCustomizationAction", {
+          detail: {
+            action: "characterChange",
+            payload: {
+              character: Object.keys(petCompanions)[newIndex % Object.keys(petCompanions).length],
+            },
+          },
+        })
+      )
+
+      return newIndex
+      })
+  }
+
+  const handlePetSpriteLeftArrowClick = () => {
+    setPetSelectIndex((prevIndex) => {
+      let newIndex = 0
+      if (prevIndex === 0) {
+        newIndex = Object.keys(petCompanions).length - 1;
+        window.dispatchEvent(
+          new CustomEvent("petCustomizationAction", {
+            detail: {
+              action: "characterChange",
+              payload: {
+                character: Object.keys(petCompanions)[newIndex % Object.keys(petCompanions).length],
+              },
+            },
+          })
+        );
+      } else {
+        newIndex = prevIndex - 1;
+        window.dispatchEvent(
+          new CustomEvent("petCustomizationAction", {
+            detail: {
+              action: "characterChange",
+              payload: {
+                character: Object.keys(petCompanions)[newIndex % Object.keys(petCompanions).length],
+              },
+            },
+          })
+        );
+      }
+      return newIndex;
+
+    })
+  }
 
   useEffect(() => {
     if (!characterCustomizationRef.current || !petCustomizationRef.current)
@@ -759,13 +822,13 @@ const CharacterMenu = () => {
                 </div>
               </div>
               {<PriceBox price={100} clickHandler={() => ({})} />}
-              <ArrowButtons />
+              <ArrowButtons rightArrowClick={handlePetSpriteRightArrowClick} leftArrowClick={handlePetSpriteLeftArrowClick}/>
             </div>
 
             {/* RIGHT: Customization Options */}
             <div className="flex-1 grid grid-rows-3 grid-cols-3 gap-3">
               <clothingConfigContext.Provider
-                value={{ mClothing, fClothing, setMClothing, setFClothing, myGender, setMyGender }}
+                value={{ mClothing, fClothing, setMClothing, setFClothing, myGender, setMyGender, }}
               >
                 {/* HATS */}
                 {isMale? <CustomizationItem title="HATS" asset={hats} /> : <CustomizationItem title="HATS" asset={hats} />}

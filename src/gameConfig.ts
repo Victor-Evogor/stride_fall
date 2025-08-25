@@ -116,7 +116,6 @@ type FemaleFootwear =
   | "silverblue_socks"
   | null;
 
-type FemaleBottomClothings = "skirt" | null;
 
 type FemaleHair = "black" | "blond" | "brown" | "golden" | "red" | null;
 
@@ -162,17 +161,7 @@ interface GeneralConfig {
   coins: number;
   highScore: number;
   armor: number;
-  ownedItems: (
-    | MaleTopClothings
-    | MaleBottomClothings
-    | MaleShoes
-    | MaleHandItems
-    | MaleHairs
-    | FemaleBottomClothings
-    | FemaleHair
-    | PetAccessory
-    | Pets
-  )[];
+  ownedItems: string[];
   pet: Pets | null;
   petAccessory: PetAccessory | null;
 }

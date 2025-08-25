@@ -1,24 +1,35 @@
 import {
   useState,
   type FunctionComponent,
-  type PropsWithChildren
+  type PropsWithChildren,
 } from "react";
 
 import { AppContext } from "./AppContext";
 import { type GameConfigType } from "./gameConfig";
 
-
 const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [score, setScore] = useState(0);
-  const [isPaused, setIsPaused] = useState(false)
+  const [isPaused, setIsPaused] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [isCharacterCustomizeMenuOpen, setIsCharacterCustomizeMenuOpen] = useState<boolean>(false)
+  const [isCharacterCustomizeMenuOpen, setIsCharacterCustomizeMenuOpen] =
+    useState<boolean>(false);
   const [gameConfig, setGameConfig] = useState<GameConfigType>({
     armor: 0,
     coins: 0,
     highScore: 0,
-    ownedItems: [],
+    ownedItems: [
+      "Female Black hair",
+      "Female Blonde hair",
+      "Female Brown hair",
+      "Female Golden hair",
+      "Female Red hair",
+      "Male Black hair"
+  , "Male Blonde hair"
+  , "Male Brown hair"
+  , "Male Golden hair"
+  , "Male Red hair"
+    ],
     pet: null,
     characterGender: "female",
     selectedCharacter: "sandstoneFemaleCharacter",
@@ -30,7 +41,7 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
     hand: null,
     hair: null,
     petAccessory: null,
-  })
+  });
 
   return (
     <AppContext.Provider
@@ -46,7 +57,7 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
         gameConfig,
         isCharacterCustomizeMenuOpen,
         setIsCharacterCustomizeMenuOpen,
-        setGameConfig
+        setGameConfig,
       }}
     >
       {children}

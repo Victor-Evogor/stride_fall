@@ -12,7 +12,6 @@ import {
   useRef,
   useState,
   useEffect,
-  
   useCallback
 } from "react";
 import Phaser from "phaser";
@@ -32,7 +31,6 @@ import {
   petCompanions,
   
 } from "../assetMap";
-import type { MaleGameConfigType } from "../gameConfig";
 import PriceBox from "./PriceBox";
 import { type fClothingType, type mClothingType } from "../types";
 import CustomizationItem from "./CustomizationItem";
@@ -40,6 +38,7 @@ import GenderToggleButton from "./GenderToggleButton";
 import AcceptButton from "./AcceptButton";
 import ArrowButtons from "./ArrowButtons";
 import clothingConfigContext from "../clothingContext";
+import { saveGameConfig, type GameConfigType } from "../gameConfig";
 
 
 const CharacterMenu = () => {
@@ -47,14 +46,14 @@ const CharacterMenu = () => {
   const petCustomizationRef = useRef<HTMLDivElement>(null);
   const isScenesMountedRef = useRef<boolean>(false);
 
-  const  setCharacterSelectIndex = useState(0)[1];
+  const  [characterIndex, setCharacterSelectIndex] = useState(0);
   const [characterColor, setCharacterColor] = useState({
     male: "sandstone",
     female: "sandstone"
   })
   const setPetSelectIndex = useState(0)[1]
 
-  const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"];
+  const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"] as const;
 
   const [mClothing, setMClothing] = useState<mClothingType>({
     hat: null,
@@ -180,60 +179,48 @@ const CharacterMenu = () => {
   };
 
   const handleAcceptChanges = () => {
-    // Here you can add any logic to save/apply the customization changes
-    console.log("Character customization changes accepted");
-    // console.log(fClothing, mClothing)
-    if (myGender === "male"){
-      setGameConfig(prev => {
-        const newConfig: MaleGameConfigType = {
-          ...(prev as MaleGameConfigType),
-          clothing: {
-            hat: mClothing.hat, 
-            bottom: mClothing.bottom,
-            footwear: mClothing.footwear
-          },
-          hand: mClothing.handItem,
-
-        }
-
-        console.log("Setting game config")
-        console.log("Previous gameConfig", prev)
-        console.log("New Game config", newConfig)
-
-        return {
-          ...prev,
-          clothing: {
-            hat: mClothing.hat,
-
-
-          }
-        }
-      })
-    } else if(myGender === "female"){
-      setGameConfig(prev => {
-        const newConfig = {
-          ...prev,
-          clothing: {
-            ...prev.clothing,
-            hat: fClothing.hat,
-            skirt: fClothing.skirt,
-            outfit: fClothing.outfit,
-            footwear: fClothing.footwear
-          },
-          hand: fClothing.handItem,
-          hair: fClothing.hair
-        }
-
-        console.log("Setting game config")
-        console.log("Previous gameConfig", prev)
-        console.log("New Game config", newConfig)
-
-        return newConfig
-      })
-    }
-    // For now, just close the menu
+    setGameConfig(prev => {
+      const clothingInput = myGender === "male" ? mClothing : fClothing;
+  
+      // utility to validate item
+      const ensureOwned = (item: string | null, prevItem: string | null) => {
+        if (item === null) return null; // leave nulls untouched
+        return ownedItems.includes(item) ? item : prevItem;
+      };
+  
+      // iterate over clothing keys safely
+      const validatedClothing = Object.keys(clothingInput).reduce(
+        (acc, key) => {
+          const k = key as keyof typeof clothingInput;
+          const newValue = clothingInput[k];
+          const prevValue =
+            prev.clothing[k as keyof typeof prev.clothing] ?? null;
+          acc[k] = ensureOwned(newValue, prevValue);
+          return acc;
+        },
+        {} as typeof clothingInput
+      );
+  
+      const newConfig: GameConfigType = {
+        ...prev,
+        selectedCharacter:
+          characterColors[characterIndex] +
+          (myGender === "male" ? "MaleCharacter" : "FemaleCharacter"),
+        characterGender: myGender,
+        clothing: validatedClothing,
+        hand: ensureOwned(clothingInput.handItem, prev.hand),
+        hair: ensureOwned(clothingInput.hair, prev.hair),
+      };
+  
+      saveGameConfig(newConfig)
+  
+      return newConfig;
+    });
+  
     closeCharacterMenu();
   };
+  
+  
 
   const handleCharacterSpriteLeftArrowClick = () => {
     setCharacterSelectIndex((prevIndex) => {

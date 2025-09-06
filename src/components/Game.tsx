@@ -16,7 +16,6 @@ const Game = () => {
     setIsGameStarted,
     setIsGameOver,
     setGameConfig,
-    gameConfig,
   } = ctx;
   const gameInitializedRef = useRef(false); // 👈 Prevent double rendering in react devmode with use strict enabled
 

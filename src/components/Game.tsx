@@ -55,8 +55,9 @@ const Game = () => {
           selectedCharacter: "sandstoneFemaleCharacter",
           clothing: {
             hat: null,
-            topBottom: null,
-            shoes: null,
+            footwear: null,
+            outfit: null,
+            skirt: null,
           },
           hand: null,
           hair: null,

@@ -1,11 +1,8 @@
 import menuBg from "../assets/UI/RectangleBox_96x96.png";
 import characterBg from "../assets/UI/ItemBox_24x24.png";
 import petCompanionBg from "../assets/UI/HotkeyBox_34x34.png";
-import priceBox from "../assets/UI/Button_52x14.png";
-import titleBox from "../assets/UI/TitleBox_64x16.png";
-import leftArrow from "../assets/UI/LeftArrowButton_7x10.png";
-import rightArrow from "../assets/UI/RightArrowButton_7x10.png";
 import cornerExitKnot from "../assets/UI/CornerKnot_14x14.png";
+import CoinDisplay from "./CoinDisplay";
 import {
   PetCustomizationScene,
   CharacterCustomizationScene,
@@ -15,15 +12,8 @@ import {
   useRef,
   useState,
   useEffect,
-  createContext,
-  useContext,
-  useMemo,
-  useCallback,
-  type SetStateAction,
-  type Dispatch,
-  type PropsWithChildren,
-  type FunctionComponent,
-  type MouseEventHandler,
+  
+  useCallback
 } from "react";
 import Phaser from "phaser";
 import {
@@ -40,457 +30,17 @@ import {
   femaleFootwear,
   maleFootwear,
   petCompanions,
-  type Asset,
+  
 } from "../assetMap";
+import type { MaleGameConfigType } from "../gameConfig";
+import PriceBox from "./PriceBox";
+import { type fClothingType, type mClothingType } from "../types";
+import CustomizationItem from "./CustomizationItem";
+import GenderToggleButton from "./GenderToggleButton";
+import AcceptButton from "./AcceptButton";
+import ArrowButtons from "./ArrowButtons";
+import clothingConfigContext from "../clothingContext";
 
-export interface mClothingType {
-  hat: string | null;
-  hair: string | null;
-  top: string | null;
-  bottom: string | null;
-  footwear: string | null;
-  handItem: string | null;
-}
-
-export interface fClothingType {
-  hat: string | null;
-  hair: string | null;
-  outfit: string | null;
-  skirt: string | null;
-  footwear: string | null;
-  handItem: string | null;
-}
-
-const clothingConfigContext = createContext<{
-  mClothing: mClothingType;
-  fClothing: fClothingType;
-  setMClothing: Dispatch<SetStateAction<mClothingType>>;
-  setFClothing: Dispatch<SetStateAction<fClothingType>>;
-  myGender: "male" | "female";
-  setMyGender: Dispatch<SetStateAction<"male" | "female">>;
-  ownedItems: string[];
-  purchaseItem: (itemName: string, price: number) => boolean
-} | null>(null);
-
-const useClothingConfig = () => {
-  const context = useContext(clothingConfigContext);
-  if (!context) {
-    throw new Error(
-      "useClothingConfig must be used within a ClothingConfigProvider"
-    );
-  }
-  return context;
-};
-
-interface CustomizationItemPropsInterface {
-  title: string;
-  image?: string;
-  price?: number;
-  buyHandler?: MouseEventHandler<HTMLDivElement>;
-  asset: Record<string, Asset>;
-}
-
-// Purchase notification component
-const PurchaseNotification: FunctionComponent<{
-  message: string;
-  type: 'success' | 'error';
-  onClose: () => void;
-}> = ({ message, type, onClose }) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onClose();
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  return (
-    <div
-      className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-white font-bold transition-all duration-300 ${
-        type === 'success' ? 'bg-green-600' : 'bg-red-600'
-      }`}
-      style={{
-        textShadow: "1px 1px 0px #000",
-        animation: "slideInRight 0.3s ease-out"
-      }}
-    >
-      {message}
-    </div>
-  );
-};
-
-const CustomizationItem = ({
-  title,
-  asset,
-}: CustomizationItemPropsInterface) => {
-  const { myGender, mClothing, fClothing, ownedItems, purchaseItem } = useClothingConfig();
-  const assetKeys = useMemo(() => Object.keys(asset), [asset]);
-  
-  const getInitialIndex = useCallback(() => {
-    let key = title.toLowerCase();
-    if (key === 'hats') {
-      key = 'hat';
-    } else if (key === 'hand item') {
-      key = 'handItem';
-    }
-
-    const clothing = myGender === 'male' ? mClothing : fClothing;
-    if (Object.prototype.hasOwnProperty.call(clothing, key)) {
-      const selectedAsset = clothing[key as keyof typeof clothing];
-      if (selectedAsset) {
-        const index = assetKeys.indexOf(selectedAsset);
-        if (index !== -1) {
-          return index + 1; // +1 for "None" at index 0
-        }
-      }
-    }
-    return 0;
-  }, [assetKeys, fClothing, mClothing, myGender, title]);
-
-  useEffect(() => {
-    if(title !== "pet accessories")
-      setCurrentItemIndex(getInitialIndex());
-  }, [asset, getInitialIndex, title])
-
-  const [currentItemIndex, setCurrentItemIndex] = useState(0);
-  const [purchaseMessage, setPurchaseMessage] = useState<{message: string, type: 'success' | 'error'} | null>(null);
-  const isInitialMount = useRef(true);
-  
-  // Create the full list with null at index 0
-  const totalItems = assetKeys.length + 1; // +1 for the null item
-
-  // Get current item based on index
-  let currentItem: Asset | null = null;
-  if (currentItemIndex > 0) {
-    const assetKey = assetKeys[currentItemIndex - 1];
-    currentItem = asset[assetKey];
-  }
-
-  // Check if current item is owned
-  const isItemOwned = currentItem ? ownedItems.includes(assetKeys[currentItemIndex - 1]) : true; // "None" is always owned
-
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-    
-    
-    if(title !== "pet accessories"){
-      window.dispatchEvent(
-        new CustomEvent("customizationAction", {
-          detail: {
-            action: "updateCustomizationItem",
-            payload: {
-              currentItem: currentItem,
-              assetName: currentItem ? assetKeys[currentItemIndex - 1] : null,
-              title: title.toLowerCase(),
-            },
-          },
-        })
-      );
-    } else {
-      window.dispatchEvent(
-        new CustomEvent("petCustomizationAction", {
-          detail: {
-            action: "updateAccessory",
-            payload: {
-              currentItem: currentItem,
-              assetName: currentItem ? assetKeys[currentItemIndex - 1] : null,
-            }
-          }
-        })
-      )
-    }
-  }, [currentItem, assetKeys, currentItemIndex, title, isItemOwned]);
-
-  const handleLeftArrowClick: MouseEventHandler<HTMLImageElement> = () => {
-    setCurrentItemIndex((prevIndex) => {
-      const newIndex = prevIndex === 0 ? totalItems - 1 : prevIndex - 1;
-      return newIndex;
-    });
-  };
-
-  const rightArrowClick: MouseEventHandler<HTMLImageElement> = () => {
-    setCurrentItemIndex((prevIndex) => {
-      const newIndex = (prevIndex + 1) % totalItems;
-      return newIndex;
-    });
-  };
-
-  const buyHandler = () => {
-    if (!currentItem) return;
-    
-    const itemName = assetKeys[currentItemIndex - 1];
-    const success = purchaseItem(itemName, currentItem.price || 0);
-    
-    if (success) {
-      setPurchaseMessage({
-        message: `Successfully purchased ${itemName}!`,
-        type: 'success'
-      });
-    } else {
-      setPurchaseMessage({
-        message: `Not enough coins to buy ${itemName}!`,
-        type: 'error'
-      });
-    }
-  };
-
-  return (
-    <div className="flex flex-col items-center">
-      {purchaseMessage && (
-        <PurchaseNotification
-          message={purchaseMessage.message}
-          type={purchaseMessage.type}
-          onClose={() => setPurchaseMessage(null)}
-        />
-      )}
-      
-      <div
-        className="relative px-3 py-1 mb-2"
-        style={{
-          backgroundImage: `url(${titleBox})`,
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
-          imageRendering: "pixelated",
-          minWidth: "80px",
-          height: "24px",
-        }}
-      >
-        <span
-          className="text-white text-xs font-bold leading-none flex items-center justify-center h-full uppercase"
-          style={{ textShadow: "1px 1px 0px #000" }}
-        >
-          {title}
-        </span>
-      </div>
-
-      <ArrowButtons
-        leftArrowClick={handleLeftArrowClick}
-        rightArrowClick={rightArrowClick}
-      >
-        <div
-          className="relative mb-2"
-          style={{
-            backgroundImage: `url(${characterBg})`,
-            backgroundSize: "100% 100%",
-            backgroundRepeat: "no-repeat",
-            imageRendering: "pixelated",
-            width: "64px",
-            height: "64px",
-          }}
-        >
-          {currentItem ? (
-            <>
-              <img
-                src={currentItem.icon}
-                alt={
-                  currentItemIndex > 0 ? assetKeys[currentItemIndex - 1] : "empty"
-                }
-                className="absolute inset-0 w-full h-full object-cover scale-x-[-1]"
-                style={{
-                  imageRendering: "pixelated",
-                  transform: "scale(1.6)",
-                  filter: !isItemOwned ? "grayscale(100%) brightness(0.5)" : "none"
-                }}
-              />
-              {!isItemOwned && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-red-500 text-2xl font-bold">🔒</div>
-                </div>
-              )}
-            </>
-          ) : null}
-        </div>
-      </ArrowButtons>
-
-      {/* Price Button - only show if item exists, has a price, and is not owned */}
-      {currentItem?.price && !isItemOwned && (
-        <PriceBox price={currentItem.price} clickHandler={buyHandler} />
-      )}
-      
-      {/* Owned indicator */}
-      {currentItem && isItemOwned && (
-        <div
-          className="relative px-2 py-1 mb-1"
-          style={{
-            backgroundImage: `url(${priceBox})`,
-            backgroundSize: "100% 100%",
-            backgroundRepeat: "no-repeat",
-            imageRendering: "pixelated",
-            minWidth: "52px",
-            height: "14px",
-            filter: "hue-rotate(120deg)"
-          }}
-        >
-          <span
-            className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-            style={{ textShadow: "1px 1px 0px #000" }}
-          >
-            OWNED
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const PriceBox: FunctionComponent<{
-  price: number;
-  clickHandler: MouseEventHandler<HTMLDivElement>;
-}> = ({ price, clickHandler }) => {
-  return (
-    <div
-      className="relative px-2 py-2 mb-1 cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-100"
-      style={{
-        backgroundImage: `url(${priceBox})`,
-        backgroundSize: "100% 100%",
-        backgroundRepeat: "no-repeat",
-        imageRendering: "pixelated",
-        minWidth: "52px",
-        height: "14px",
-      }}
-      onClick={clickHandler}
-    >
-      <span
-        className="text-white text-xs font-bold leading-none flex items-center justify-center h-full"
-        style={{ textShadow: "1px 1px 0px #000" }}
-      >
-        {price}G
-      </span>
-    </div>
-  );
-};
-
-const CoinDisplay: FunctionComponent<{
-  coinAmount: number;
-}> = ({ coinAmount }) => {
-  return (
-    <div className="flex items-center justify-center mb-3">
-      <div
-        className="relative px-4 py-2 flex items-center gap-2"
-        style={{
-          backgroundImage: `url(${titleBox})`,
-          backgroundSize: "100% 100%",
-          backgroundRepeat: "no-repeat",
-          imageRendering: "pixelated",
-          minWidth: "120px",
-          height: "28px",
-        }}
-      >
-        {/* Coin icon - you can replace this with an actual coin sprite if you have one */}
-        <div
-          className="w-4 h-4 rounded-full border-2 border-yellow-400 bg-yellow-300 flex items-center justify-center"
-          style={{
-            boxShadow:
-              "inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.3)",
-          }}
-        >
-          <span className="text-xs font-bold text-yellow-800">G</span>
-        </div>
-        <span
-          className="text-white text-sm font-bold leading-none flex-1 text-center"
-          style={{ textShadow: "1px 1px 0px #000" }}
-        >
-          {coinAmount.toLocaleString()}
-        </span>
-      </div>
-    </div>
-  );
-};
-
-const ArrowButtons: FunctionComponent<
-  PropsWithChildren<{
-    leftArrowClick?: MouseEventHandler<HTMLImageElement>;
-    rightArrowClick?: MouseEventHandler<HTMLImageElement>;
-  }>
-> = ({ children, leftArrowClick, rightArrowClick }) => {
-  return (
-    <div className="flex items-center justify-center gap-2">
-      <img
-        src={leftArrow}
-        alt="Left Arrow"
-        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4 z-10"
-        style={{ imageRendering: "pixelated" }}
-        onClick={leftArrowClick}
-      />
-      {children}
-      <img
-        src={rightArrow}
-        alt="Right Arrow"
-        className="cursor-pointer transition-transform duration-100 hover:scale-110 active:scale-95 w-4 z-10"
-        style={{ imageRendering: "pixelated" }}
-        onClick={rightArrowClick}
-      />
-    </div>
-  );
-};
-
-const GenderToggleButton: FunctionComponent<{
-  gender: "male" | "female";
-  isActive: boolean;
-  isDisabled: boolean;
-  onClick: () => void;
-}> = ({ gender, isActive, isDisabled, onClick }) => {
-  return (
-    <div
-      className={`relative px-3 py-1 transition-all duration-150 ${
-        isDisabled
-          ? "cursor-not-allowed opacity-50"
-          : "cursor-pointer hover:scale-105 active:scale-95"
-      }`}
-      style={{
-        backgroundImage: `url(${priceBox})`,
-        backgroundSize: "100% 100%",
-        backgroundRepeat: "no-repeat",
-        imageRendering: "pixelated",
-        minWidth: "40px",
-        height: "20px",
-        filter: isDisabled
-          ? "brightness(0.6) saturate(0.5)"
-          : isActive
-          ? "brightness(1.2)"
-          : "brightness(1)",
-      }}
-      onClick={!isDisabled ? onClick : undefined}
-    >
-      <span
-        className={`text-white text-sm font-bold leading-none flex items-center justify-center h-full ${
-          isActive ? "text-yellow-200" : "text-white"
-        }`}
-        style={{ textShadow: "1px 1px 0px #000" }}
-      >
-        {gender.toUpperCase()}
-      </span>
-    </div>
-  );
-};
-
-const AcceptButton: FunctionComponent<{
-  onClick: () => void;
-}> = ({ onClick }) => {
-  return (
-    <div
-      className="relative px-6 py-2 cursor-pointer transition-transform duration-150 hover:scale-105 active:scale-95"
-      style={{
-        backgroundImage: `url(${titleBox})`,
-        backgroundSize: "100% 100%",
-        backgroundRepeat: "no-repeat",
-        imageRendering: "pixelated",
-        minWidth: "120px",
-        height: "32px",
-      }}
-      onClick={onClick}
-    >
-      <span
-        className="text-white text-sm font-bold leading-none flex items-center justify-center h-full"
-        style={{ textShadow: "1px 1px 0px #000" }}
-      >
-        APPLY CHANGES
-      </span>
-    </div>
-  );
-};
 
 const CharacterMenu = () => {
   const characterCustomizationRef = useRef<HTMLDivElement>(null);
@@ -525,9 +75,11 @@ const CharacterMenu = () => {
 
   const {
     setIsCharacterCustomizeMenuOpen,
-    gameConfig: { characterGender, coins, ownedItems },
+    // gameConfig: { characterGender, coins, ownedItems },
+    gameConfig,
     setGameConfig,
   } = useAppContext();
+  const {characterGender, coins, ownedItems} = gameConfig
   const [myGender, setMyGender] = useState(characterGender);
 
   const isMale = myGender === "male";
@@ -630,6 +182,55 @@ const CharacterMenu = () => {
   const handleAcceptChanges = () => {
     // Here you can add any logic to save/apply the customization changes
     console.log("Character customization changes accepted");
+    // console.log(fClothing, mClothing)
+    if (myGender === "male"){
+      setGameConfig(prev => {
+        const newConfig: MaleGameConfigType = {
+          ...(prev as MaleGameConfigType),
+          clothing: {
+            hat: mClothing.hat, 
+            bottom: mClothing.bottom,
+            footwear: mClothing.footwear
+          },
+          hand: mClothing.handItem,
+
+        }
+
+        console.log("Setting game config")
+        console.log("Previous gameConfig", prev)
+        console.log("New Game config", newConfig)
+
+        return {
+          ...prev,
+          clothing: {
+            hat: mClothing.hat,
+
+
+          }
+        }
+      })
+    } else if(myGender === "female"){
+      setGameConfig(prev => {
+        const newConfig = {
+          ...prev,
+          clothing: {
+            ...prev.clothing,
+            hat: fClothing.hat,
+            skirt: fClothing.skirt,
+            outfit: fClothing.outfit,
+            footwear: fClothing.footwear
+          },
+          hand: fClothing.handItem,
+          hair: fClothing.hair
+        }
+
+        console.log("Setting game config")
+        console.log("Previous gameConfig", prev)
+        console.log("New Game config", newConfig)
+
+        return newConfig
+      })
+    }
     // For now, just close the menu
     closeCharacterMenu();
   };
@@ -791,6 +392,9 @@ const CharacterMenu = () => {
     const companionCustomizationGame = new Phaser.Game(
       companionCustomizationConfig
     );
+
+    console.log("Saved config: ")
+    console.log(gameConfig)
 
     return () => {
       characterCustomizationGame.destroy(true);

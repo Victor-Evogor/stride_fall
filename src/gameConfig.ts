@@ -166,30 +166,33 @@ interface GeneralConfig {
   petAccessory: PetAccessory | null;
 }
 
-export type GameConfigType =
-  | ({
-      characterGender: "male";
-      selectedCharacter: MaleCharacters;
-      clothing: {
-        hat: MaleHats;
-        top: MaleTopClothings;
-        bottom: MaleBottomClothings;
-        shoes: MaleShoes;
-      };
-      hand: MaleHandItems;
-      hair: MaleHairs;
-    } & GeneralConfig)
-  | ({
-      characterGender: "female";
-      selectedCharacter: FemaleCharacters;
-      clothing: {
-        hat: MaleHats;
-        topBottom: FemaleTopAndBottomClothing;
-        shoes: FemaleFootwear
-      };
-      hand: FemaleHandItems;
-      hair: FemaleHair;
-    } & GeneralConfig);
+export type FemaleGameConfigType  = ({
+  characterGender: "female";
+  selectedCharacter: FemaleCharacters;
+  clothing: {
+    hat: MaleHats;
+    outfit: FemaleTopAndBottomClothing;
+    skirt: "Skirt" | null,
+    footwear: FemaleFootwear
+  };
+  hand: FemaleHandItems;
+  hair: FemaleHair;
+} & GeneralConfig)
+
+export type MaleGameConfigType = ({
+  characterGender: "male";
+  selectedCharacter: MaleCharacters;
+  clothing: {
+    hat: MaleHats;
+    top: MaleTopClothings;
+    bottom: MaleBottomClothings;
+    footwear: MaleShoes;
+  };
+  hand: MaleHandItems;
+  hair: MaleHairs;
+} & GeneralConfig)
+
+export type GameConfigType = MaleGameConfigType | FemaleGameConfigType;
 
 
     export const GameConfigSchema = z.discriminatedUnion('characterGender', [
@@ -206,7 +209,7 @@ export type GameConfigType =
           hat: z.string().nullable(),
           top: z.string().nullable(),
           bottom: z.string().nullable(),
-          shoes: z.string().nullable(),
+          footwear: z.string().nullable(),
         }),
         hand: z.string().nullable(),
         hair: z.string().nullable(),
@@ -228,8 +231,9 @@ export type GameConfigType =
         ]),
         clothing: z.object({
           hat: z.string().nullable(),
-          topBottom: z.string().nullable(),
-          shoes: z.string().nullable(),
+          outfit: z.string().nullable(),
+          skirt: z.string().nullable(),
+          footwear: z.string().nullable(),
         }),
         hand: z.string().nullable(),
         hair: z.string().nullable(),

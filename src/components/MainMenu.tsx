@@ -9,8 +9,7 @@ const MainMenu = () => {
     const buttons = [
         { label: 'START', action: () => setIsGameStarted(true) },
         { label: 'CHARACTER', action: () => setIsCharacterCustomizeMenuOpen(true) },
-        { label: 'HOW TO PLAY', action: () => console.log('Reset button clicked') },
-        { label: 'CREDITS', action: () => console.log('Credits button clicked') }
+        { label: 'INFO', action: () => console.log('Reset button clicked') }
     ]
 
     return (

@@ -31,7 +31,7 @@ import { DEFAULT_CHARACTER } from "../constants"
 
 import { femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing, petAccessories, type PetAccessoriesAssetKeys} from "../assetMap"
 
-import {type fClothingType, type mClothingType} from "../components/CharacterMenu"
+import {type fClothingType, type mClothingType} from "../types"
 
 
 
@@ -377,7 +377,7 @@ export class CharacterCustomizationScene extends Phaser.Scene{
                   this.clothing.hat.destroy();
                   this.clothing.hat = null;
                 }
-                // check if this.hat is already set
+                
                 if(item){
                 this.clothing.hat = this.add.sprite(32, -25, assetName, 0).setScale(2.3).setFlipX(true).setOrigin(0.5, 0).setDepth(5).play(`${assetName}-idle`);
                 this.resetAllAnimations()
@@ -467,6 +467,12 @@ export class CharacterCustomizationScene extends Phaser.Scene{
     this.events.once("destroy", ()=> {
       window.removeEventListener("customizationAction",handleCustomizationAction)
     })
+
+    window.dispatchEvent(
+      new CustomEvent("characterCustomizationSceneReady", {
+        detail: { sceneKey: this.scene.key }
+      })
+    );
   }
 
 

@@ -380,10 +380,70 @@ const CharacterMenu = () => {
       companionCustomizationConfig
     );
 
-    console.log("Saved config: ")
-    console.log(gameConfig)
+    const handleCharacterCustomizationMountEvent = () => {
+      if (gameConfig.characterGender === "male"){
+        const newClothing: mClothingType = {
+          hair: gameConfig.hair || null,
+          bottom: gameConfig.clothing.bottom || null,
+          footwear: gameConfig.clothing.footwear || null,
+          handItem: gameConfig.hand || null,
+          hat: gameConfig.clothing.hat || null,
+          top: gameConfig.clothing.top || null,
+        };
+      
+        
+
+        window.dispatchEvent(
+          new CustomEvent("customizationAction", {
+            detail: {
+              action: "genderChange",
+              payload: {
+                gender: "male",
+                mClothing: newClothing,
+                fClothing: fClothing,
+                color: gameConfig.selectedCharacter.split("Male")[0]
+              },
+            },
+          })
+        );
+      
+        // Finally update the state
+        setMClothing(newClothing);
+        
+      } else {
+        const newClothing: fClothingType = {
+          hair: gameConfig.hair || null,
+          handItem: gameConfig.hand || null,
+          footwear: gameConfig.clothing.footwear || null,
+          hat: gameConfig.clothing.hat || null,
+          outfit: gameConfig.clothing.outfit || null,
+          skirt: gameConfig.clothing.skirt || null,
+        };
+      
+
+        window.dispatchEvent(
+          new CustomEvent("customizationAction", {
+            detail: {
+              action: "genderChange",
+              payload: {
+                gender: "female",
+                fClothing: newClothing,
+                mClothing: mClothing,
+                color: gameConfig.selectedCharacter.split("Female")[0]
+              },
+            },
+          })
+        );
+      
+        // Finally update the state
+        setFClothing(newClothing);
+      }
+    }
+
+    window.addEventListener("characterCustomizationSceneReady", handleCharacterCustomizationMountEvent)
 
     return () => {
+      window.removeEventListener("characterCustomizationSceneReady", handleCharacterCustomizationMountEvent)
       characterCustomizationGame.destroy(true);
       companionCustomizationGame.destroy(true);
     };

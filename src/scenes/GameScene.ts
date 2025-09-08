@@ -44,6 +44,7 @@ import snail from "../assets/Mob/Snail/all.png";
 
 import goldCoin from "../assets/collectibles/gold_coin.png";
 import emptyCoin from "../assets/coin_empty.png"
+import type { GameConfigType } from "../gameConfig";
 
 class GameScene extends Phaser.Scene {
   character: Phaser.Physics.Arcade.Sprite | null = null;
@@ -583,16 +584,25 @@ class GameScene extends Phaser.Scene {
       this.scene.restart();
     }
 
+    const handleNewChangesEvent = (e: Event) => {
+      const event = e as CustomEvent<GameConfigType>;
+      this.selectedCharacter = event.detail.selectedCharacter;
+      this.character!.play(`${this.selectedCharacter}-idle`);
+    }
+
     window.addEventListener("pauseGame", pauseGameEventHandler);
 
     window.addEventListener("restartGame", restartGameEventHandler)
 
     window.addEventListener("endGame", endGameEventHandler)
 
+    window.addEventListener("newChanges", handleNewChangesEvent)
+
     this.events.once('shutdown', () => {
     window.removeEventListener('pauseGame', pauseGameEventHandler);
     window.removeEventListener("restartGame", restartGameEventHandler)
     window.removeEventListener("endGame", endGameEventHandler)
+    window.removeEventListener("newChanges", handleNewChangesEvent)
   });
 
   this.events.once("destroy", () => {

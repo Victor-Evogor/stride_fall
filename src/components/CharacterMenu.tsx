@@ -213,7 +213,9 @@ const CharacterMenu = () => {
         hair: ensureOwned(clothingInput.hair, prev.hair),
       };
 
-      console.log("New config", newConfig)
+      window.dispatchEvent(new CustomEvent("newChanges", {
+        detail: newConfig
+      }))
   
       saveGameConfig(newConfig)
   

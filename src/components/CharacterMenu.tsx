@@ -46,14 +46,14 @@ const CharacterMenu = () => {
   const petCustomizationRef = useRef<HTMLDivElement>(null);
   const isScenesMountedRef = useRef<boolean>(false);
 
-  const  [characterIndex, setCharacterSelectIndex] = useState(0);
+  
   const [characterColor, setCharacterColor] = useState({
     male: "sandstone",
     female: "sandstone"
   })
   const setPetSelectIndex = useState(0)[1]
 
-  const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"] as const;
+  const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"];
 
   const [mClothing, setMClothing] = useState<mClothingType>({
     hat: null,
@@ -78,7 +78,8 @@ const CharacterMenu = () => {
     gameConfig,
     setGameConfig,
   } = useAppContext();
-  const {characterGender, coins, ownedItems} = gameConfig
+  const {characterGender, coins, ownedItems, selectedCharacter} = gameConfig
+  const  [characterIndex, setCharacterSelectIndex] = useState(characterColors.indexOf(selectedCharacter.split(characterGender === "male"? "Male": "Female")[0]));
   const [myGender, setMyGender] = useState(characterGender);
 
   const isMale = myGender === "male";
@@ -211,6 +212,8 @@ const CharacterMenu = () => {
         hand: ensureOwned(clothingInput.handItem, prev.hand),
         hair: ensureOwned(clothingInput.hair, prev.hair),
       };
+
+      console.log("New config", newConfig)
   
       saveGameConfig(newConfig)
   

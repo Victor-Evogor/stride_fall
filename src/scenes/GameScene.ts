@@ -634,7 +634,7 @@ class GameScene extends Phaser.Scene {
       window.removeEventListener("endGame", endGameEventHandler);
     });
 
-    this.physics.world.createDebugGraphic(); // Uncomment this for debugging
+    // this.physics.world.createDebugGraphic(); // Uncomment this for debugging
   }
 
   update(_: number, delta: number) {

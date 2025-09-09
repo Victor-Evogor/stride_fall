@@ -58,7 +58,7 @@ class GameScene extends Phaser.Scene {
       fSkirt: Phaser.GameObjects.Sprite | null,
       mTop: Phaser.GameObjects.Sprite | null,
       mBottom: Phaser.GameObjects.Sprite | null,
-    } = {
+    } | null= {
       "hat": null,
       "footwear": null,
       "handItem": null,
@@ -115,13 +115,23 @@ class GameScene extends Phaser.Scene {
   this.birds = []
   this.mobSpawnTimer = 0;
   this.elapsedTime = 0;
+  this.clothing = {
+    "hat": null,
+    "footwear": null,
+    "handItem": null,
+    "hair": null,
+    "fOutfit": null,
+    "fSkirt": null,
+    "mTop": null,
+    "mBottom": null,
+  }
   
   loadGameConfig().then(config => {
     if (!config) {
       console.error("Config hasn't been set")
       return
     }
-    this.loadGameConfig(config)
+    this.selectedCharacter = config.selectedCharacter;
   })
   }
 
@@ -592,6 +602,14 @@ class GameScene extends Phaser.Scene {
     
     
     this.physics.add.collider(this.playerContainer, this.platform);
+
+    loadGameConfig().then(config => {
+      if (!config) {
+        console.error("Config hasn't been set")
+        return
+      }
+      this.loadGameConfig(config)
+    })
     
 
     this.input.keyboard?.on("keydown-SPACE", () => {
@@ -925,6 +943,7 @@ class GameScene extends Phaser.Scene {
   killPlayer(killerMob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     if (!this.character) return;
     this.character.play(`${this.selectedCharacter}-die`);
+    this.followThroughAnimation("-die")
     this.scrollSpeed = 0;
     this.playerDied = true;
 
@@ -1145,6 +1164,28 @@ class GameScene extends Phaser.Scene {
 
   loadGameConfig(config: GameConfigType){
     this.selectedCharacter = config.selectedCharacter
+    if (config.characterGender === "male"){
+      const mConfig: mClothingType = {
+        bottom: config.clothing.bottom || null,
+        footwear: config.clothing.footwear,
+        hair: config.hair,
+        handItem: config.hand,
+        hat: config.clothing.hat,
+        top: config.clothing.top || null
+      }
+      this.putOnClothing(mConfig)
+    } else if(config.characterGender === "female"){
+      const fClothing: fClothingType = {
+        footwear: config.clothing.footwear,
+        hair: config.hair,
+        handItem: config.hand,
+        hat: config.clothing.hat,
+        outfit: config.clothing.outfit || null,
+        skirt: config.clothing.skirt || null
+      }
+
+      this.putOnClothing(fClothing)
+    }
   }
 
   resetAllAnimations() {
@@ -1160,74 +1201,77 @@ class GameScene extends Phaser.Scene {
     })
   }
 
-  putOnClothing(clothing: mClothingType | fClothingType){
-    this.resetAllAnimations()
-    console.log("reset all animations")
-    console.log("Clothing keys", Object.keys(clothing))
-    
-    // Character position for reference
+  putOnClothing(clothing: mClothingType | fClothingType) {
+    if (!this.playerContainer) {
+      console.error("Player not initialized");
+      return;
+    }
+    this.resetAllAnimations();
+  
+    console.log("reset all animations");
+    console.log("Clothing keys", Object.keys(clothing));
+  
+    // Character anchor point (feet)
     const charX = 0;
     const charY = 0;
-    
+  
     Object.keys(clothing).forEach((key) => {
-      if(key === "hat" && clothing[key as keyof typeof clothing]){
-        this.clothing.hat = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(2)
-        .play(`${clothing[key as keyof typeof clothing]}-idle`);
-        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
-      } else if(key === "footwear" && clothing[key as keyof typeof clothing]){
-        this.clothing.footwear = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(1)
-        .play(`${clothing[key as keyof typeof clothing]}-idle`);
-        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      if (!this.playerContainer) {
+        console.error("Player not initialized");
+        return;
       }
-      else if(key === "handItem" && clothing[key as keyof typeof clothing]){
-        this.clothing.handItem = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(1)
-        .play(`${clothing[key as keyof typeof clothing]}-idle`);
-        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
-      } else if(key === "hair" && clothing[key as keyof typeof clothing]){
-        // Hair should be at the same position as character
-        this.clothing.hair = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(1)
-        .play(`${clothing[key as keyof typeof clothing]}-idle`);
-        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
-      } else if(key === "outfit" && clothing[key as keyof typeof clothing]){
-        this.clothing.fOutfit = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(1)
-        .play(`${clothing[key as keyof typeof clothing]}-idle`);
-        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
-      } else if(key === "skirt" && clothing[key as keyof typeof clothing]){
-        this.clothing.fSkirt = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(2).play(`${clothing[key as keyof typeof clothing]}-idle`);
-        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
-      } else if(key === "top" && clothing[key as keyof typeof clothing]){
-        this.clothing.mTop = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(1)
-        .play(`${clothing[key as keyof typeof clothing]}-idle`);
-      } else if(key === "bottom" && clothing[key as keyof typeof clothing]){
-        this.clothing.mBottom = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!, 0)
-        .setOrigin(0.5, 1)
-        .setFlipX(true)
-        .setDepth(1)
-        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+  
+      const assetName = clothing[key as keyof typeof clothing];
+      if (!assetName) return; // nothing equipped in this slot
+  
+      // Helper to avoid repetition
+      const addClothingSprite = (slot: keyof typeof this.clothing, depth: number) => {
+        // Destroy old sprite if exists
+        if (this.clothing[slot]) {
+          this.clothing[slot].destroy();
+        }
+        // Create new sprite
+        this.clothing[slot] = this.add
+          .sprite(charX, charY, assetName)
+          .setOrigin(0.5, 1)
+          .setFlipX(true)
+          .setDepth(depth)
+          .play(`${assetName}-idle`);
+        // Add to container
+        this.playerContainer!.add(this.clothing[slot]);
+        console.log("equipped", key, "->", assetName);
+      };
+  
+      // Equip based on clothing slot
+      switch (key) {
+        case "hat":
+          addClothingSprite("hat", 2);
+          break;
+        case "footwear":
+          addClothingSprite("footwear", 1);
+          break;
+        case "handItem":
+          addClothingSprite("handItem", 3); // usually above body
+          break;
+        case "hair":
+          addClothingSprite("hair", 2); // above head, behind hat
+          break;
+        case "outfit":
+          addClothingSprite("fOutfit", 1);
+          break;
+        case "skirt":
+          addClothingSprite("fSkirt", 2);
+          break;
+        case "top":
+          addClothingSprite("mTop", 1);
+          break;
+        case "bottom":
+          addClothingSprite("mBottom", 1);
+          break;
       }
-    })
-}
+    });
+  }
+  
 
   followThroughAnimation(sequence: string){
     Object.keys(this.clothing).forEach(key => {

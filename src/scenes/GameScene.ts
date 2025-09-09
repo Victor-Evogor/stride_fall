@@ -880,19 +880,7 @@ class GameScene extends Phaser.Scene {
     mob.destroy();
 
     // Flash red
-    this.character.setTint(0xff0000);
-    this.tweens.add({
-      targets: this.character,
-      alpha: 0.2,
-      ease: "Linear",
-      duration: 100,
-      yoyo: true,
-      repeat: 3,
-      onComplete: () => {
-        this.character!.clearTint();
-        this.character!.setAlpha(1);
-      },
-    });
+    this.flashCharacterAndClothing()
   }
 
   killPlayer(killerMob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
@@ -1254,6 +1242,39 @@ class GameScene extends Phaser.Scene {
       }
     });
   }
+
+  flashCharacterAndClothing() {
+    // Collect all sprites (main character + clothing layers)
+    if(!this.character){
+      console.error("Character not initialized");
+      return
+    }
+    const sprites: Phaser.GameObjects.Sprite[] = [
+      this.character,
+      ...(Object.values(this.clothing || {}).filter(
+        (item): item is Phaser.GameObjects.Sprite => !!item
+      )),
+    ];
+  
+    // Apply tint + flash tween to all
+    sprites.forEach((sprite) => {
+      sprite.setTint(0xff0000);
+  
+      this.tweens.add({
+        targets: sprite,
+        alpha: 0.2,
+        ease: "Linear",
+        duration: 100,
+        yoyo: true,
+        repeat: 3,
+        onComplete: () => {
+          sprite.clearTint();
+          sprite.setAlpha(1);
+        },
+      });
+    });
+  }
+  
 }
 
 export default GameScene;

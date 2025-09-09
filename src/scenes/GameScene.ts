@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import type { AppContextType } from "../AppContext";
 import { MOB_SPEEDS, COLUMNS_PER_ROW, DEFAULT_CHARACTER } from "../constants";
-
+import { femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing, petAccessories, type PetAccessoriesAssetKeys} from "../assetMap"
 import damageBar from "../assets/UI/MinimumDamage/minimum_damage.png";
 
 // -- characters --
@@ -44,10 +44,30 @@ import snail from "../assets/Mob/Snail/all.png";
 
 import goldCoin from "../assets/collectibles/gold_coin.png";
 import emptyCoin from "../assets/coin_empty.png"
-import type { GameConfigType } from "../gameConfig";
+import { loadGameConfig, type GameConfigType } from "../gameConfig";
+import type { fClothingType, mClothingType } from "../types";
 
 class GameScene extends Phaser.Scene {
-  character: Phaser.Physics.Arcade.Sprite | null = null;
+  character: Phaser.GameObjects.Sprite | null = null;
+  clothing: {
+      hat: Phaser.GameObjects.Sprite | null,
+      footwear: Phaser.GameObjects.Sprite | null,
+      handItem: Phaser.GameObjects.Sprite | null,
+      hair: Phaser.GameObjects.Sprite | null,
+      fOutfit: Phaser.GameObjects.Sprite | null,
+      fSkirt: Phaser.GameObjects.Sprite | null,
+      mTop: Phaser.GameObjects.Sprite | null,
+      mBottom: Phaser.GameObjects.Sprite | null,
+    } = {
+      "hat": null,
+      "footwear": null,
+      "handItem": null,
+      "hair": null,
+      "fOutfit": null,
+      "fSkirt": null,
+      "mTop": null,
+      "mBottom": null,
+    }
   bgElements: Phaser.GameObjects.Image[] = [];
   gameStarted: boolean = false;
   scrollSpeed: number = 0;
@@ -72,7 +92,10 @@ class GameScene extends Phaser.Scene {
   coinSpawnTimer: number = 0;
   coinsDisplayText: Phaser.GameObjects.Text | null = null;
   armor = 0;
+  assets = [femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing];
   selectedCharacter = DEFAULT_CHARACTER;
+  characterXOffset = 100;
+  playerContainer: Phaser.GameObjects.Container | null = null;
 
   constructor() {
     super("GameScene");
@@ -92,6 +115,14 @@ class GameScene extends Phaser.Scene {
   this.birds = []
   this.mobSpawnTimer = 0;
   this.elapsedTime = 0;
+  
+  loadGameConfig().then(config => {
+    if (!config) {
+      console.error("Config hasn't been set")
+      return
+    }
+    this.loadGameConfig(config)
+  })
   }
 
   preload() {
@@ -188,6 +219,19 @@ class GameScene extends Phaser.Scene {
       frameHeight: 594,
     });
     this.load.image("emptyCoin", emptyCoin);
+
+
+    // load all items
+    this.assets.forEach((assetMap) => {
+      Object.keys(assetMap).forEach(assetName => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sprite = (assetMap as any)[assetName].sprite
+        this.load.spritesheet(assetName, sprite, {
+          frameWidth: 80,
+          frameHeight: 64,
+        });
+      })
+    })
   }
 
   create() {
@@ -328,7 +372,9 @@ class GameScene extends Phaser.Scene {
       "bronzeFemaleCharacter",
       "sandstoneFemaleCharacter",
       "umberFemaleCharacter",
-  ];
+  ].concat(this.assets.map(asset => Object.keys(asset)).reduce((a, b) => a.concat(b)));
+
+  
 
   characters.forEach((character) => {
     this.anims.create({
@@ -524,36 +570,39 @@ class GameScene extends Phaser.Scene {
       }).setOrigin(0, 1)
       .setDepth(5)
 
-    this.character = this.physics.add
-      .sprite(100, this.groundHeight, this.selectedCharacter)
+      this.character = this.add
+      .sprite(0, 0, this.selectedCharacter)
       .setOrigin(0.5, 1)
-      .setScale(2.5)
       .setFlipX(true)
-      .setDepth(3)
-      .setCollideWorldBounds(true);
 
-    if (this.character && this.character.body) {
-      this.character.body.setSize(16, 43);
-      this.character.body.setOffset(32, 20);
-      this.character.play(`${this.selectedCharacter}-idle`);
-    }
+    
+    this.character.play(`${this.selectedCharacter}-idle`);
 
     this.platform = this.add
       .rectangle(width / 2, this.groundHeight, width * 3, 16, 0x000000, 0)
       .setOrigin(0.5, 0);
     this.physics.add.existing(this.platform, true);
-    this.physics.add.collider(this.character, this.platform);
+    this.playerContainer = this.add.container(100, this.groundHeight, [this.character]).setDepth(3)
+    this.physics.add.existing(this.playerContainer);
+    const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
+    body.setCollideWorldBounds(true);
+    body.setSize(16, 43); // hitbox size — tune this to fit your sprite
+    this.playerContainer.setScale(2.5)
+    body.setOffset(-8, -43);
+    
+    
+    this.physics.add.collider(this.playerContainer, this.platform);
+    
 
     this.input.keyboard?.on("keydown-SPACE", () => {
       if (
-        this.character &&
-        this.character.body &&
+        this.playerContainer &&
         this.gameStarted &&
         !this.playerDied
       ) {
-        const body = this.character.body as Phaser.Physics.Arcade.Body;
+        const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
         if (body.blocked.down) {
-          this.character.setVelocityY(-500);
+          body.setVelocityY(-500);
         }
       }
     });
@@ -612,7 +661,7 @@ class GameScene extends Phaser.Scene {
   })
 
 
-    // this.physics.world.createDebugGraphic(); // Uncomment this for debugging
+    this.physics.world.createDebugGraphic(); // Uncomment this for debugging
   }
 
   update(_: number, delta: number) {
@@ -620,9 +669,9 @@ class GameScene extends Phaser.Scene {
       this.gameStarted = (
         window as { REACT_CONTEXT?: AppContextType }
       ).REACT_CONTEXT!.isGameStarted;
-    if (!this.character) return;
+    if (!this.playerContainer || !this.character) return;
 
-    const body = this.character.body as Phaser.Physics.Arcade.Body;
+    const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
 
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
@@ -637,6 +686,7 @@ class GameScene extends Phaser.Scene {
       !this.playerDied
     ) {
       this.character.play(`${this.selectedCharacter}-jump-rise`);
+      this.followThroughAnimation("-jump-rise")
     } else if (
       body.velocity.y > 10 &&
       !body.blocked.down &&
@@ -644,15 +694,19 @@ class GameScene extends Phaser.Scene {
       !this.playerDied
     ) {
       this.character.play(`${this.selectedCharacter}-jump-fall`);
+      this.followThroughAnimation("-jump-fall")
     } else if (body.blocked.down && this.gameStarted && !this.playerDied) {
       // Only play walk or run when grounded and not already playing
       if (this.scrollSpeed > 250 && this.character.anims.getName() !== `${this.selectedCharacter}-run`) {
         this.character.play(`${this.selectedCharacter}-run`);
+        this.followThroughAnimation("-run")
       } else if (
         this.scrollSpeed <= 250 &&
         this.character.anims.getName() !== `${this.selectedCharacter}-walk`
+        
       ) {
         this.character.play(`${this.selectedCharacter}-walk`);
+        this.followThroughAnimation("-walk")
       }
     }
 
@@ -779,7 +833,7 @@ class GameScene extends Phaser.Scene {
   }
 
   spawnMob(type: "snail" | "bee" | "boar") {
-    if (!this.platform || !this.character) return;
+    if (!this.platform || !this.playerContainer) return;
     const x = (this.sys.game.config.width as number) + 0;
     const groundY = this.groundHeight;
     let mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null = null;
@@ -826,7 +880,7 @@ class GameScene extends Phaser.Scene {
     .setAlpha(1).setVisible(true)
     ;
     this.mobs.push(mob);
-    this.physics.add.overlap(this.character, mob, () =>
+    this.physics.add.overlap(this.playerContainer, mob, () =>
     {
       this.handleMobCollision(mob)
 
@@ -836,7 +890,7 @@ class GameScene extends Phaser.Scene {
 
   handleMobCollision(mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     // const type = mob.getData("type");
-    if (!this.character || this.playerDied) return;
+    if (!this.playerContainer || this.playerDied || !this.character) return;
 
     this.health--;
     this.updateHealthBarGui(this.health);
@@ -1022,7 +1076,7 @@ class GameScene extends Phaser.Scene {
   }
 
   spawnColletible(type: "coin" | "heart") {
-    if(!this.character) throw new Error("Character not found!");
+    if(!this.playerContainer) throw new Error("Character not found!");
     const x = (this.sys.game.config.width as number) + 0;
     const y = this.groundHeight -( Phaser.Math.Between(0, 1)?50: 140);
     let collectible: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null =
@@ -1043,7 +1097,7 @@ class GameScene extends Phaser.Scene {
     collectible.setDepth(3)
     collectible.body.setAllowGravity(false)
     this.bgElements.push(collectible)
-    this.physics.add.overlap(this.character, collectible, () =>
+    this.physics.add.overlap(this.playerContainer, collectible, () =>
       this.handleCollectibleCollision(collectible)
     );
   }
@@ -1089,7 +1143,100 @@ class GameScene extends Phaser.Scene {
     return Math.random() < Math.min(chance, 0.3); // max 30% chance
   }
 
+  loadGameConfig(config: GameConfigType){
+    this.selectedCharacter = config.selectedCharacter
+  }
 
+  resetAllAnimations() {
+    if(!this.character) return
+    this.character.play(this.character.anims.getName())
+    Object.keys(this.clothing).forEach((key) => {
+      if(this.clothing[key as keyof typeof this.clothing]) {
+        const clothingItem = this.clothing[key as keyof typeof this.clothing];
+        if(clothingItem) {
+          clothingItem.play(`${clothingItem.texture.key}-idle`);
+        }
+      }
+    })
+  }
+
+  putOnClothing(clothing: mClothingType | fClothingType){
+    this.resetAllAnimations()
+    console.log("reset all animations")
+    console.log("Clothing keys", Object.keys(clothing))
+    
+    // Character position for reference
+    const charX = 0;
+    const charY = 0;
+    
+    Object.keys(clothing).forEach((key) => {
+      if(key === "hat" && clothing[key as keyof typeof clothing]){
+        this.clothing.hat = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(2)
+        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      } else if(key === "footwear" && clothing[key as keyof typeof clothing]){
+        this.clothing.footwear = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(1)
+        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      }
+      else if(key === "handItem" && clothing[key as keyof typeof clothing]){
+        this.clothing.handItem = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(1)
+        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      } else if(key === "hair" && clothing[key as keyof typeof clothing]){
+        // Hair should be at the same position as character
+        this.clothing.hair = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(1)
+        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      } else if(key === "outfit" && clothing[key as keyof typeof clothing]){
+        this.clothing.fOutfit = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(1)
+        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      } else if(key === "skirt" && clothing[key as keyof typeof clothing]){
+        this.clothing.fSkirt = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(2).play(`${clothing[key as keyof typeof clothing]}-idle`);
+        console.log("key", key, "assetName", clothing[key as keyof typeof clothing]!)
+      } else if(key === "top" && clothing[key as keyof typeof clothing]){
+        this.clothing.mTop = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(1)
+        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+      } else if(key === "bottom" && clothing[key as keyof typeof clothing]){
+        this.clothing.mBottom = this.add.sprite(charX, charY, clothing[key as keyof typeof clothing]!, 0)
+        .setOrigin(0.5, 1)
+        .setFlipX(true)
+        .setDepth(1)
+        .play(`${clothing[key as keyof typeof clothing]}-idle`);
+      }
+    })
+}
+
+  followThroughAnimation(sequence: string){
+    Object.keys(this.clothing).forEach(key => {
+      const item = this.clothing[key as keyof typeof this.clothing]
+      if(item){
+        item.play(item.texture.key+sequence, true)
+      }
+    })
+  }
 }
 
 export default GameScene;

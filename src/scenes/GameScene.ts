@@ -1,25 +1,39 @@
 import Phaser from "phaser";
 import type { AppContextType } from "../AppContext";
 import { MOB_SPEEDS, COLUMNS_PER_ROW, DEFAULT_CHARACTER } from "../constants";
-import { femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing, petAccessories, type PetAccessoriesAssetKeys} from "../assetMap"
+import {
+  femaleFootwear,
+  femaleHair,
+  femaleHand,
+  femaleOutfit,
+  femaleSkirt,
+  hats,
+  maleBottomClothing,
+  maleFootwear,
+  maleHair,
+  maleHand,
+  maleTopClothing,
+  petAccessories,
+  type PetAccessoriesAssetKeys,
+} from "../assetMap";
 import damageBar from "../assets/UI/MinimumDamage/minimum_damage.png";
 
 // -- characters --
 
 // skins
 // male
-import ivoryMaleCharacter from "../assets/character_assets/male/skin/ivory.png"
+import ivoryMaleCharacter from "../assets/character_assets/male/skin/ivory.png";
 import onyxMaleCharacter from "../assets/character_assets/male/skin/onyx.png";
-import bronzeMaleCharacter from "../assets/character_assets/male/skin/bronze.png"
-import sandstoneMaleCharacter from "../assets/character_assets/male/skin/sandstone.png"
-import umberMaleCharacter from "../assets/character_assets/male/skin/umber.png"
+import bronzeMaleCharacter from "../assets/character_assets/male/skin/bronze.png";
+import sandstoneMaleCharacter from "../assets/character_assets/male/skin/sandstone.png";
+import umberMaleCharacter from "../assets/character_assets/male/skin/umber.png";
 
 // female
-import onyxFemaleCharacter from "../assets/character_assets/female/skin/onyx.png"
-import ivoryFemaleCharacter from "../assets/character_assets/female/skin/ivory.png"
-import bronzeFemaleCharacter from "../assets/character_assets/female/skin/bronze.png"
-import sandstoneFemaleCharacter from "../assets/character_assets/female/skin/sandstone.png"
-import umberFemaleCharacter from "../assets/character_assets/female/skin/umber.png"
+import onyxFemaleCharacter from "../assets/character_assets/female/skin/onyx.png";
+import ivoryFemaleCharacter from "../assets/character_assets/female/skin/ivory.png";
+import bronzeFemaleCharacter from "../assets/character_assets/female/skin/bronze.png";
+import sandstoneFemaleCharacter from "../assets/character_assets/female/skin/sandstone.png";
+import umberFemaleCharacter from "../assets/character_assets/female/skin/umber.png";
 
 import skyBg from "../assets/background/sky.png";
 import texturesSprite from "../assets/Textures-16.png";
@@ -43,31 +57,31 @@ import bee from "../assets/Mob/small_bee/fly_hit_attack.png";
 import snail from "../assets/Mob/Snail/all.png";
 
 import goldCoin from "../assets/collectibles/gold_coin.png";
-import emptyCoin from "../assets/coin_empty.png"
+import emptyCoin from "../assets/coin_empty.png";
 import { loadGameConfig, type GameConfigType } from "../gameConfig";
 import type { fClothingType, mClothingType } from "../types";
 
 class GameScene extends Phaser.Scene {
   character: Phaser.GameObjects.Sprite | null = null;
   clothing: {
-      hat: Phaser.GameObjects.Sprite | null,
-      footwear: Phaser.GameObjects.Sprite | null,
-      handItem: Phaser.GameObjects.Sprite | null,
-      hair: Phaser.GameObjects.Sprite | null,
-      fOutfit: Phaser.GameObjects.Sprite | null,
-      fSkirt: Phaser.GameObjects.Sprite | null,
-      mTop: Phaser.GameObjects.Sprite | null,
-      mBottom: Phaser.GameObjects.Sprite | null,
-    } | null= {
-      "hat": null,
-      "footwear": null,
-      "handItem": null,
-      "hair": null,
-      "fOutfit": null,
-      "fSkirt": null,
-      "mTop": null,
-      "mBottom": null,
-    }
+    hat: Phaser.GameObjects.Sprite | null;
+    footwear: Phaser.GameObjects.Sprite | null;
+    handItem: Phaser.GameObjects.Sprite | null;
+    hair: Phaser.GameObjects.Sprite | null;
+    fOutfit: Phaser.GameObjects.Sprite | null;
+    fSkirt: Phaser.GameObjects.Sprite | null;
+    mTop: Phaser.GameObjects.Sprite | null;
+    mBottom: Phaser.GameObjects.Sprite | null;
+  } | null = {
+    hat: null,
+    footwear: null,
+    handItem: null,
+    hair: null,
+    fOutfit: null,
+    fSkirt: null,
+    mTop: null,
+    mBottom: null,
+  };
   bgElements: Phaser.GameObjects.Image[] = [];
   gameStarted: boolean = false;
   scrollSpeed: number = 0;
@@ -92,7 +106,19 @@ class GameScene extends Phaser.Scene {
   coinSpawnTimer: number = 0;
   coinsDisplayText: Phaser.GameObjects.Text | null = null;
   armor = 0;
-  assets = [femaleFootwear, femaleHair, femaleHand, femaleOutfit, femaleSkirt, hats, maleBottomClothing, maleFootwear, maleHair, maleHand, maleTopClothing];
+  assets = [
+    femaleFootwear,
+    femaleHair,
+    femaleHand,
+    femaleOutfit,
+    femaleSkirt,
+    hats,
+    maleBottomClothing,
+    maleFootwear,
+    maleHair,
+    maleHand,
+    maleTopClothing,
+  ];
   selectedCharacter = DEFAULT_CHARACTER;
   characterXOffset = 100;
   playerContainer: Phaser.GameObjects.Container | null = null;
@@ -101,38 +127,38 @@ class GameScene extends Phaser.Scene {
     super("GameScene");
   }
 
-  init(){
-  this.scrollSpeed = 100;
-  this.playerDied = false;
-  this.mobs = [];
-  this.health = 8;
-  this.distance = 0;
-  this.hasPaintedNewShrub = false;
-  this.coins = 0;
-  this.coinSpawnTimer = 0;
-  this.birdSpawnTimer = 0;
-  this.nextBirdSpawnDelay = Phaser.Math.Between(1000, 3000); // spawn delay in ms
-  this.birds = []
-  this.mobSpawnTimer = 0;
-  this.elapsedTime = 0;
-  this.clothing = {
-    "hat": null,
-    "footwear": null,
-    "handItem": null,
-    "hair": null,
-    "fOutfit": null,
-    "fSkirt": null,
-    "mTop": null,
-    "mBottom": null,
-  }
-  
-  loadGameConfig().then(config => {
-    if (!config) {
-      console.error("Config hasn't been set")
-      return
-    }
-    this.selectedCharacter = config.selectedCharacter;
-  })
+  init() {
+    this.scrollSpeed = 100;
+    this.playerDied = false;
+    this.mobs = [];
+    this.health = 8;
+    this.distance = 0;
+    this.hasPaintedNewShrub = false;
+    this.coins = 0;
+    this.coinSpawnTimer = 0;
+    this.birdSpawnTimer = 0;
+    this.nextBirdSpawnDelay = Phaser.Math.Between(1000, 3000); // spawn delay in ms
+    this.birds = [];
+    this.mobSpawnTimer = 0;
+    this.elapsedTime = 0;
+    this.clothing = {
+      hat: null,
+      footwear: null,
+      handItem: null,
+      hair: null,
+      fOutfit: null,
+      fSkirt: null,
+      mTop: null,
+      mBottom: null,
+    };
+
+    loadGameConfig().then((config) => {
+      if (!config) {
+        console.error("Config hasn't been set");
+        return;
+      }
+      this.selectedCharacter = config.selectedCharacter;
+    });
   }
 
   preload() {
@@ -154,47 +180,49 @@ class GameScene extends Phaser.Scene {
     this.load.spritesheet("ivoryMaleCharacter", ivoryMaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("onyxMaleCharacter", onyxMaleCharacter, {
+    });
+    this.load.spritesheet("onyxMaleCharacter", onyxMaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("bronzeMaleCharacter", bronzeMaleCharacter, {
+    });
+    this.load.spritesheet("bronzeMaleCharacter", bronzeMaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("sandstoneMaleCharacter", sandstoneMaleCharacter, {
+    });
+    this.load.spritesheet("sandstoneMaleCharacter", sandstoneMaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("umberMaleCharacter", umberMaleCharacter, {
+    });
+    this.load.spritesheet("umberMaleCharacter", umberMaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
+    });
 
-  // Load female characters
-  this.load.spritesheet("ivoryFemaleCharacter", ivoryFemaleCharacter, {
+    // Load female characters
+    this.load.spritesheet("ivoryFemaleCharacter", ivoryFemaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("onyxFemaleCharacter", onyxFemaleCharacter, {
+    });
+    this.load.spritesheet("onyxFemaleCharacter", onyxFemaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("bronzeFemaleCharacter", bronzeFemaleCharacter, {
+    });
+    this.load.spritesheet("bronzeFemaleCharacter", bronzeFemaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("sandstoneFemaleCharacter", sandstoneFemaleCharacter, {
+    });
+    this.load.spritesheet(
+      "sandstoneFemaleCharacter",
+      sandstoneFemaleCharacter,
+      {
+        frameWidth: 80,
+        frameHeight: 64,
+      }
+    );
+    this.load.spritesheet("umberFemaleCharacter", umberFemaleCharacter, {
       frameWidth: 80,
       frameHeight: 64,
-  });
-  this.load.spritesheet("umberFemaleCharacter", umberFemaleCharacter, {
-      frameWidth: 80,
-      frameHeight: 64,
-  });
-
-
+    });
 
     this.load.spritesheet("bird", bird, {
       frameWidth: 16,
@@ -230,18 +258,17 @@ class GameScene extends Phaser.Scene {
     });
     this.load.image("emptyCoin", emptyCoin);
 
-
     // load all items
     this.assets.forEach((assetMap) => {
-      Object.keys(assetMap).forEach(assetName => {
+      Object.keys(assetMap).forEach((assetName) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sprite = (assetMap as any)[assetName].sprite
+        const sprite = (assetMap as any)[assetName].sprite;
         this.load.spritesheet(assetName, sprite, {
           frameWidth: 80,
           frameHeight: 64,
         });
-      })
-    })
+      });
+    });
   }
 
   create() {
@@ -266,8 +293,6 @@ class GameScene extends Phaser.Scene {
       .sprite(200, 50, "healthBar")
       .setScale(3)
       .setDepth(4);
-
-      
 
     for (let x = 0; x < Math.ceil(width / tileSize) + 1; x++) {
       const colIndex = Phaser.Math.Between(0, 1);
@@ -369,7 +394,6 @@ class GameScene extends Phaser.Scene {
     }
 
     // --- Animations ---
-    
 
     const characters = [
       "ivoryMaleCharacter",
@@ -382,250 +406,157 @@ class GameScene extends Phaser.Scene {
       "bronzeFemaleCharacter",
       "sandstoneFemaleCharacter",
       "umberFemaleCharacter",
-  ].concat(this.assets.map(asset => Object.keys(asset)).reduce((a, b) => a.concat(b)));
+    ].concat(
+      this.assets
+        .map((asset) => Object.keys(asset))
+        .reduce((a, b) => a.concat(b))
+    );
 
-  
+    characters.forEach((character) => {
+      const makeAnim = (
+        key: string,
+        start: number,
+        end: number,
+        frameRate: number,
+        repeat: number
+      ) => {
+        if (!this.anims.exists(key)) {
+          this.anims.create({
+            key,
+            frames: this.anims.generateFrameNumbers(character, { start, end }),
+            frameRate,
+            repeat,
+          });
+        }
+      };
 
-  characters.forEach((character) => {
-    this.anims.create({
-      key: `${character}-idle`,
-      frames: this.anims.generateFrameNumbers(character, {
-        start: 0,
-        end: 4,
-      }),
-      frameRate: 6,
-      repeat: -1,
+      makeAnim(`${character}-idle`, 0, 4, 6, -1);
+      makeAnim(`${character}-jump-rise`, 30, 33, 8, -1);
+      makeAnim(`${character}-jump-fall`, 40, 43, 8, -1);
+      makeAnim(`${character}-walk`, 10, 17, 10, -1);
+      makeAnim(`${character}-run`, 20, 27, 14, -1);
+      makeAnim(`${character}-strike`, 50, 55, 12, 0);
+      makeAnim(`${character}-die`, 60, 69, 10, 0);
     });
 
-    this.anims.create({
-      key: `${character}-jump-rise`,
-      frames: this.anims.generateFrameNumbers(character, {
-        start: 30,
-        end: 33,
-      }),
-      frameRate: 8,
-      repeat: -1,
-    });
+    // Bird animation
+    // ✅ Small helper to prevent duplicates
+    const makeAnim = (
+      key: string,
+      spriteKey: string,
+      start: number | null,
+      end: number | null,
+      frameRate: number,
+      repeat: number
+    ) => {
+      if (!this.anims.exists(key)) {
+        this.anims.create({
+          key,
+          frames:
+            start !== null && end !== null
+              ? this.anims.generateFrameNumbers(spriteKey, { start, end })
+              : [{ key: spriteKey, frame: start! }], // for single-frame animations
+          frameRate,
+          repeat,
+        });
+      }
+    };
 
-    this.anims.create({
-      key: `${character}-jump-fall`,
-      frames: this.anims.generateFrameNumbers(character, {
-        start: 40,
-        end: 43,
-      }),
-      frameRate: 8,
-      repeat: -1,
-    });
-
-
-      // Walk animation
-      this.anims.create({
-          key: `${character}-walk`,
-          frames: this.anims.generateFrameNumbers(character, {
-              start: 10,
-              end: 17,
-          }),
-          frameRate: 10,
-          repeat: -1,
-      });
-
-      // Run animation
-      this.anims.create({
-          key: `${character}-run`,
-          frames: this.anims.generateFrameNumbers(character, {
-              start: 20,
-              end: 27,
-          }),
-          frameRate: 14,
-          repeat: -1,
-      });
-
-      // Strike animation
-      this.anims.create({
-          key: `${character}-strike`,
-          frames: this.anims.generateFrameNumbers(character, {
-              start: 50,
-              end: 55,
-          }),
-          frameRate: 12,
-          repeat: 0,
-      });
-
-      // Die animation
-      this.anims.create({
-          key: `${character}-die`,
-          frames: this.anims.generateFrameNumbers(character, {
-              start: 60,
-              end: 69,
-          }),
-          frameRate: 10,
-          repeat: 0,
-      });
-  });
-
-  // Bird animation
-  this.anims.create({
-    key: "bird-fly",
-    frames: this.anims.generateFrameNumbers("bird", {
-      start: 0,
-      end: 7,
-    }),
-    frameRate: 10,
-    repeat: -1,
-  });
+    // 🐦 Bird
+    makeAnim("bird-fly", "bird", 0, 7, 10, -1);
 
     // 🐌 Snail
-    this.anims.create({
-      key: "snail-run",
-      frames: this.anims.generateFrameNumbers("snail", { start: 0, end: 7 }),
-      frameRate: 6,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "snail-hide",
-      frames: this.anims.generateFrameNumbers("snail", { start: 8, end: 15 }),
-      frameRate: 8,
-      repeat: 0,
-    });
-    this.anims.create({
-      key: "snail-comeout",
-      frames: this.anims.generateFrameNumbers("snail", { start: 16, end: 23 }),
-      frameRate: 8,
-      repeat: 0,
-    });
-    this.anims.create({
-      key: "snail-die",
-      frames: this.anims.generateFrameNumbers("snail", { start: 24, end: 31 }),
-      frameRate: 10,
-      repeat: 0,
-    });
-    this.anims.create({
-      key: "snail-idle",
-      frames: [{ key: "snail", frame: 32 }],
-      frameRate: 1,
-      repeat: -1,
-    });
+    makeAnim("snail-run", "snail", 0, 7, 6, -1);
+    makeAnim("snail-hide", "snail", 8, 15, 8, 0);
+    makeAnim("snail-comeout", "snail", 16, 23, 8, 0);
+    makeAnim("snail-die", "snail", 24, 31, 10, 0);
+    makeAnim("snail-idle", "snail", 32, null, 1, -1); // single frame
 
     // 🐝 Bee
-    this.anims.create({
-      key: "bee-fly",
-      frames: this.anims.generateFrameNumbers("bee", { start: 0, end: 3 }),
-      frameRate: 10,
-      repeat: -1,
-    });
-    this.anims.create({
-      key: "bee-die",
-      frames: this.anims.generateFrameNumbers("bee", { start: 4, end: 7 }),
-      frameRate: 10,
-      repeat: 0,
-    });
-    this.anims.create({
-      key: "bee-attack",
-      frames: this.anims.generateFrameNumbers("bee", { start: 8, end: 11 }),
-      frameRate: 10,
-      repeat: -1,
+    makeAnim("bee-fly", "bee", 0, 3, 10, -1);
+    makeAnim("bee-die", "bee", 4, 7, 10, 0);
+    makeAnim("bee-attack", "bee", 8, 11, 10, -1);
+
+    // 🐗 Boars
+    ["brownBoar", "blackBoar", "whiteBoar"].forEach((boarKey) => {
+      makeAnim(`${boarKey}-run`, boarKey, 0, 5, 8, -1);
+      makeAnim(`${boarKey}-die`, boarKey, 6, 9, 8, 0);
+      makeAnim(`${boarKey}-idle`, boarKey, 12, 15, 2, -1);
     });
 
-    // 🐗 Boars (brown, black, white use same frames)
-    ["brownBoar", "blackBoar", "whiteBoar"].forEach((key) => {
-      this.anims.create({
-        key: `${key}-run`,
-        frames: this.anims.generateFrameNumbers(key, { start: 0, end: 5 }),
-        frameRate: 8,
-        repeat: -1,
-      });
-      this.anims.create({
-        key: `${key}-die`,
-        frames: this.anims.generateFrameNumbers(key, { start: 6, end: 9 }),
-        frameRate: 8,
-        repeat: 0,
-      });
-      this.anims.create({
-        key: `${key}-idle`,
-        frames: this.anims.generateFrameNumbers(key, { start: 12, end: 15 }),
-        frameRate: 2,
-        repeat: -1,
-      });
-    });
-
+    // ❤️ Health bar
     [7, 6, 5, 4, 3, 2, 1, 0].forEach((healthStatus, index) => {
-      this.anims.create({
-        key: `health-${healthStatus}`,
-        frames: this.anims.generateFrameNumbers("healthBar", {
-          start: 2 + 6 * index,
-          end: 2 + 6 * index + 5,
-        }),
-        frameRate: 2,
-        repeat: 0,
-      });
+      const key = `health-${healthStatus}`;
+      if (!this.anims.exists(key)) {
+        this.anims.create({
+          key,
+          frames: this.anims.generateFrameNumbers("healthBar", {
+            start: 2 + 6 * index,
+            end: 2 + 6 * index + 5,
+          }),
+          frameRate: 2,
+          repeat: 0,
+        });
+      }
     });
 
-    this.anims.create({
-      key: "coin-idle",
-      frames: this.anims.generateFrameNumbers("goldCoin", { start: 0, end: 9 }),
-      frameRate: 6,
-      repeat: -1,
-    });
+    // 🪙 Coin
+    makeAnim("coin-idle", "goldCoin", 0, 9, 6, -1);
 
-    this.add.sprite(130, 110, "emptyCoin")
+    this.add
+      .sprite(130, 110, "emptyCoin")
       .setScale(0.08)
       .setDepth(4)
-      .setOrigin(0.5, 0.5)
-    
-      this.coinsDisplayText = this.add.text(155, 127, `x ${this.coins}`, {
-        fontFamily: 'Pixelify Sans',
-        fontSize: '2rem',
-        color: '#ba9158',
-        
-      }).setOrigin(0, 1)
-      .setDepth(5)
+      .setOrigin(0.5, 0.5);
 
-      this.character = this.add
+    this.coinsDisplayText = this.add
+      .text(155, 127, `x ${this.coins}`, {
+        fontFamily: "Pixelify Sans",
+        fontSize: "2rem",
+        color: "#ba9158",
+      })
+      .setOrigin(0, 1)
+      .setDepth(5);
+
+    this.character = this.add
       .sprite(0, 0, this.selectedCharacter)
       .setOrigin(0.5, 1)
-      .setFlipX(true)
+      .setFlipX(true);
 
-    
     this.character.play(`${this.selectedCharacter}-idle`);
 
     this.platform = this.add
       .rectangle(width / 2, this.groundHeight, width * 3, 16, 0x000000, 0)
       .setOrigin(0.5, 0);
     this.physics.add.existing(this.platform, true);
-    this.playerContainer = this.add.container(100, this.groundHeight, [this.character]).setDepth(3)
+    this.playerContainer = this.add
+      .container(100, this.groundHeight, [this.character])
+      .setDepth(3);
     this.physics.add.existing(this.playerContainer);
     const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
     body.setCollideWorldBounds(true);
     body.setSize(16, 43); // hitbox size — tune this to fit your sprite
-    this.playerContainer.setScale(2.5)
+    this.playerContainer.setScale(2.5);
     body.setOffset(-8, -43);
-    
-    
+
     this.physics.add.collider(this.playerContainer, this.platform);
 
-    loadGameConfig().then(config => {
+    loadGameConfig().then((config) => {
       if (!config) {
-        console.error("Config hasn't been set")
-        return
+        console.error("Config hasn't been set");
+        return;
       }
-      this.loadGameConfig(config)
-    })
-    
+      this.loadGameConfig(config);
+    });
 
     this.input.keyboard?.on("keydown-SPACE", () => {
-      if (
-        this.playerContainer &&
-        this.gameStarted &&
-        !this.playerDied
-      ) {
+      if (this.playerContainer && this.gameStarted && !this.playerDied) {
         const body = this.playerContainer.body as Phaser.Physics.Arcade.Body;
         if (body.blocked.down) {
           body.setVelocityY(-500);
         }
       }
     });
-
-    
 
     const reactCtx = (window as { REACT_CONTEXT?: AppContextType })
       .REACT_CONTEXT;
@@ -635,49 +566,73 @@ class GameScene extends Phaser.Scene {
       this.gameStarted = true;
     }
 
-    const pauseGameEventHandler: EventListenerOrEventListenerObject = (event) => {
+    const pauseGameEventHandler: EventListenerOrEventListenerObject = (
+      event
+    ) => {
       if ((event as CustomEvent).detail.isPaused) {
         this.scene.pause();
       } else {
         this.scene.resume();
       }
-    }
+    };
 
     const restartGameEventHandler = () => {
       this.scene.restart();
-    }
+    };
 
     const endGameEventHandler = () => {
       this.scene.restart();
-    }
+    };
 
     const handleNewChangesEvent = (e: Event) => {
       const event = e as CustomEvent<GameConfigType>;
-      this.selectedCharacter = event.detail.selectedCharacter;
+      const config = event.detail
+      this.selectedCharacter = config.selectedCharacter;
       this.character!.play(`${this.selectedCharacter}-idle`);
-    }
+      if (config.characterGender === "male") {
+        const mConfig: mClothingType = {
+          bottom: config.clothing.bottom || null,
+          footwear: config.clothing.footwear,
+          hair: config.hair,
+          handItem: config.hand,
+          hat: config.clothing.hat,
+          top: config.clothing.top || null,
+        };
+        this.putOnClothing(mConfig);
+      } else if (config.characterGender === "female") {
+        const fClothing: fClothingType = {
+          footwear: config.clothing.footwear,
+          hair: config.hair,
+          handItem: config.hand,
+          hat: config.clothing.hat,
+          outfit: config.clothing.outfit || null,
+          skirt: config.clothing.skirt || null,
+        };
+  
+        this.putOnClothing(fClothing);
+      }
+    };
 
     window.addEventListener("pauseGame", pauseGameEventHandler);
 
-    window.addEventListener("restartGame", restartGameEventHandler)
+    window.addEventListener("restartGame", restartGameEventHandler);
 
-    window.addEventListener("endGame", endGameEventHandler)
+    window.addEventListener("endGame", endGameEventHandler);
 
-    window.addEventListener("newChanges", handleNewChangesEvent)
+    window.addEventListener("newChanges", handleNewChangesEvent);
 
-    this.events.once('shutdown', () => {
-    window.removeEventListener('pauseGame', pauseGameEventHandler);
-    window.removeEventListener("restartGame", restartGameEventHandler)
-    window.removeEventListener("endGame", endGameEventHandler)
-    window.removeEventListener("newChanges", handleNewChangesEvent)
-  });
+    this.events.once("shutdown", () => {
+      window.removeEventListener("pauseGame", pauseGameEventHandler);
+      window.removeEventListener("restartGame", restartGameEventHandler);
+      window.removeEventListener("endGame", endGameEventHandler);
+      window.removeEventListener("newChanges", handleNewChangesEvent);
+    });
 
-  this.events.once("destroy", () => {
-    window.removeEventListener('pauseGame', pauseGameEventHandler);
-    window.removeEventListener("restartGame", restartGameEventHandler)
-    window.removeEventListener("endGame", endGameEventHandler)
-  })
-
+    this.events.once("destroy", () => {
+      window.removeEventListener("pauseGame", pauseGameEventHandler);
+      window.removeEventListener("restartGame", restartGameEventHandler);
+      window.removeEventListener("endGame", endGameEventHandler);
+    });
 
     this.physics.world.createDebugGraphic(); // Uncomment this for debugging
   }
@@ -704,7 +659,7 @@ class GameScene extends Phaser.Scene {
       !this.playerDied
     ) {
       this.character.play(`${this.selectedCharacter}-jump-rise`);
-      this.followThroughAnimation("-jump-rise")
+      this.followThroughAnimation("-jump-rise");
     } else if (
       body.velocity.y > 10 &&
       !body.blocked.down &&
@@ -712,19 +667,21 @@ class GameScene extends Phaser.Scene {
       !this.playerDied
     ) {
       this.character.play(`${this.selectedCharacter}-jump-fall`);
-      this.followThroughAnimation("-jump-fall")
+      this.followThroughAnimation("-jump-fall");
     } else if (body.blocked.down && this.gameStarted && !this.playerDied) {
       // Only play walk or run when grounded and not already playing
-      if (this.scrollSpeed > 250 && this.character.anims.getName() !== `${this.selectedCharacter}-run`) {
+      if (
+        this.scrollSpeed > 250 &&
+        this.character.anims.getName() !== `${this.selectedCharacter}-run`
+      ) {
         this.character.play(`${this.selectedCharacter}-run`);
-        this.followThroughAnimation("-run")
+        this.followThroughAnimation("-run");
       } else if (
         this.scrollSpeed <= 250 &&
         this.character.anims.getName() !== `${this.selectedCharacter}-walk`
-        
       ) {
         this.character.play(`${this.selectedCharacter}-walk`);
-        this.followThroughAnimation("-walk")
+        this.followThroughAnimation("-walk");
       }
     }
 
@@ -799,18 +756,21 @@ class GameScene extends Phaser.Scene {
 
       // -- Collectible spawning --
 
-      if(!this.playerDied){
+      if (!this.playerDied) {
         this.coinSpawnTimer += delta;
-        if(this.coinSpawnTimer >= this.getSpawnCollectibleInterval() && this.shouldSpawnCollectible()){
+        if (
+          this.coinSpawnTimer >= this.getSpawnCollectibleInterval() &&
+          this.shouldSpawnCollectible()
+        ) {
           this.coinSpawnTimer = 0;
-          this.spawnColletible("coin")
+          this.spawnColletible("coin");
         }
       }
 
       // update coin balance
 
-      if(this.coinsDisplayText)
-      this.coinsDisplayText.setText(`x ${this.coins}`);
+      if (this.coinsDisplayText)
+        this.coinsDisplayText.setText(`x ${this.coins}`);
     }
 
     // update birds
@@ -894,16 +854,11 @@ class GameScene extends Phaser.Scene {
     // mob.setVelocityX(-(mob.getData("speed")));
     mob.setData("type", type);
     mob.setData("isKillerMob", false);
-    mob.setDepth(4)
-    .setAlpha(1).setVisible(true)
-    ;
+    mob.setDepth(4).setAlpha(1).setVisible(true);
     this.mobs.push(mob);
-    this.physics.add.overlap(this.playerContainer, mob, () =>
-    {
-      this.handleMobCollision(mob)
-
-    }
-    );
+    this.physics.add.overlap(this.playerContainer, mob, () => {
+      this.handleMobCollision(mob);
+    });
   }
 
   handleMobCollision(mob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
@@ -943,7 +898,7 @@ class GameScene extends Phaser.Scene {
   killPlayer(killerMob: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
     if (!this.character) return;
     this.character.play(`${this.selectedCharacter}-die`);
-    this.followThroughAnimation("-die")
+    this.followThroughAnimation("-die");
     this.scrollSpeed = 0;
     this.playerDied = true;
 
@@ -960,11 +915,13 @@ class GameScene extends Phaser.Scene {
     } else if (type === "bee") {
       killerMob.play("bee-fly");
     }
-    setTimeout(()=>{
+    setTimeout(() => {
       window.dispatchEvent(
-        new CustomEvent("gameOver", { detail: { coinsCollected: this.coins, score: this.distance } })
+        new CustomEvent("gameOver", {
+          detail: { coinsCollected: this.coins, score: this.distance },
+        })
       );
-    }, 3_000)
+    }, 3_000);
   }
 
   getSpawnInterval(): number {
@@ -1095,34 +1052,35 @@ class GameScene extends Phaser.Scene {
   }
 
   spawnColletible(type: "coin" | "heart") {
-    if(!this.playerContainer) throw new Error("Character not found!");
+    if (!this.playerContainer) throw new Error("Character not found!");
     const x = (this.sys.game.config.width as number) + 0;
-    const y = this.groundHeight -( Phaser.Math.Between(0, 1)?50: 140);
+    const y = this.groundHeight - (Phaser.Math.Between(0, 1) ? 50 : 140);
     let collectible: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody | null =
       null;
 
     if (type === "coin") {
-      collectible = this.physics.add.sprite(x, y, "coin")
-      .setSize(563, 564)
-      .setScale(0.05)
-      .setOffset(64, 44)
-      ;
-      collectible.play("coin-idle")
-    }/*  else if(type === "heart"){
+      collectible = this.physics.add
+        .sprite(x, y, "coin")
+        .setSize(563, 564)
+        .setScale(0.05)
+        .setOffset(64, 44);
+      collectible.play("coin-idle");
+    } /*  else if(type === "heart"){
 
-    }  */else {
-      throw new Error("Collectible "+type+" not found!")
+    }  */ else {
+      throw new Error("Collectible " + type + " not found!");
     }
-    collectible.setDepth(3)
-    collectible.body.setAllowGravity(false)
-    this.bgElements.push(collectible)
+    collectible.setDepth(3);
+    collectible.body.setAllowGravity(false);
+    this.bgElements.push(collectible);
     this.physics.add.overlap(this.playerContainer, collectible, () =>
       this.handleCollectibleCollision(collectible)
     );
   }
 
-
-  handleCollectibleCollision(collectible:Phaser.Types.Physics.Arcade.SpriteWithDynamicBody){
+  handleCollectibleCollision(
+    collectible: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
+  ) {
     if (!this.character || this.playerDied) return;
 
     if (collectible.texture.key === "goldCoin") {
@@ -1146,59 +1104,62 @@ class GameScene extends Phaser.Scene {
   getSpawnCollectibleInterval(): number {
     const baseInterval = 5000; // Start slow
     const minInterval = 2000; // Never go below this
-    const decayRate = 0.006;  // Lower = slower decay
+    const decayRate = 0.006; // Lower = slower decay
     const randomness = Phaser.Math.Between(-400, 400); // Add jitter
-  
+
     const interval = baseInterval * Math.exp(-decayRate * this.distance);
     const noisyInterval = Math.max(minInterval, interval + randomness);
-  
+
     return noisyInterval;
   }
-  
 
   shouldSpawnCollectible(): boolean {
     const baseChance = 0.04;
-    const chance = baseChance + (this.distance / 100000); // increase over time
+    const chance = baseChance + this.distance / 100000; // increase over time
     return Math.random() < Math.min(chance, 0.3); // max 30% chance
   }
 
-  loadGameConfig(config: GameConfigType){
-    this.selectedCharacter = config.selectedCharacter
-    if (config.characterGender === "male"){
+  loadGameConfig(config: GameConfigType) {
+    this.selectedCharacter = config.selectedCharacter;
+    if (config.characterGender === "male") {
       const mConfig: mClothingType = {
         bottom: config.clothing.bottom || null,
         footwear: config.clothing.footwear,
         hair: config.hair,
         handItem: config.hand,
         hat: config.clothing.hat,
-        top: config.clothing.top || null
-      }
-      this.putOnClothing(mConfig)
-    } else if(config.characterGender === "female"){
+        top: config.clothing.top || null,
+      };
+      this.putOnClothing(mConfig);
+    } else if (config.characterGender === "female") {
       const fClothing: fClothingType = {
         footwear: config.clothing.footwear,
         hair: config.hair,
         handItem: config.hand,
         hat: config.clothing.hat,
         outfit: config.clothing.outfit || null,
-        skirt: config.clothing.skirt || null
-      }
+        skirt: config.clothing.skirt || null,
+      };
 
-      this.putOnClothing(fClothing)
+      this.putOnClothing(fClothing);
     }
   }
 
   resetAllAnimations() {
-    if(!this.character) return
-    this.character.play(this.character.anims.getName())
+    if (!this.character) return;
+    if (!this.playerContainer || !this.clothing) {
+      console.error("Player not initialized");
+      return;
+    }
+    this.character.play(this.character.anims.getName());
     Object.keys(this.clothing).forEach((key) => {
-      if(this.clothing[key as keyof typeof this.clothing]) {
-        const clothingItem = this.clothing[key as keyof typeof this.clothing];
-        if(clothingItem) {
+      if (this.clothing![key as keyof typeof this.clothing]) {
+        const clothingItem = this.clothing![key as keyof typeof this.clothing];
+        if (clothingItem) {
           clothingItem.play(`${clothingItem.texture.key}-idle`);
         }
       }
-    })
+    });
   }
 
   putOnClothing(clothing: mClothingType | fClothingType) {
@@ -1207,25 +1168,34 @@ class GameScene extends Phaser.Scene {
       return;
     }
     this.resetAllAnimations();
-  
+
     console.log("reset all animations");
     console.log("Clothing keys", Object.keys(clothing));
-  
+
     // Character anchor point (feet)
     const charX = 0;
     const charY = 0;
-  
+
     Object.keys(clothing).forEach((key) => {
-      if (!this.playerContainer) {
+      if (!this.playerContainer || !this.clothing) {
         console.error("Player not initialized");
         return;
       }
-  
+
       const assetName = clothing[key as keyof typeof clothing];
       if (!assetName) return; // nothing equipped in this slot
-  
+
       // Helper to avoid repetition
-      const addClothingSprite = (slot: keyof typeof this.clothing, depth: number) => {
+      const addClothingSprite = (
+        slot: keyof typeof this.clothing,
+        depth: number
+      ) => {
+        if (!this.playerContainer || !this.clothing) {
+          console.error("Player not initialized");
+          return;
+        }
+
+
         // Destroy old sprite if exists
         if (this.clothing[slot]) {
           this.clothing[slot].destroy();
@@ -1241,7 +1211,7 @@ class GameScene extends Phaser.Scene {
         this.playerContainer!.add(this.clothing[slot]);
         console.log("equipped", key, "->", assetName);
       };
-  
+
       // Equip based on clothing slot
       switch (key) {
         case "hat":
@@ -1271,15 +1241,18 @@ class GameScene extends Phaser.Scene {
       }
     });
   }
-  
 
-  followThroughAnimation(sequence: string){
-    Object.keys(this.clothing).forEach(key => {
-      const item = this.clothing[key as keyof typeof this.clothing]
-      if(item){
-        item.play(item.texture.key+sequence, true)
+  followThroughAnimation(sequence: string) {
+    if (!this.playerContainer || !this.clothing) {
+      console.error("Player not initialized");
+      return;
+    }
+    Object.keys(this.clothing).forEach((key) => {
+      const item = this.clothing![key as keyof typeof this.clothing];
+      if (item) {
+        item.play(item.texture.key + sequence, true);
       }
-    })
+    });
   }
 }
 

@@ -85,6 +85,11 @@ const CharacterMenu = () => {
   const isMale = myGender === "male";
   const isFemale = myGender === "female";
 
+
+  useEffect(()=> {
+    console.log("Character index", characterIndex)
+  }, [characterIndex])
+
   const closeCharacterMenu = () => {
     setIsCharacterCustomizeMenuOpen(false);
   };
@@ -159,6 +164,7 @@ const CharacterMenu = () => {
 
   const handleGenderToggle = (gender: "male" | "female") => {
     if (gender !== myGender) {
+      setCharacterSelectIndex(0)
       setMyGender(() => {
         window.dispatchEvent(
           new CustomEvent("customizationAction", {

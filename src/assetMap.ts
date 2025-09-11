@@ -618,8 +618,8 @@ export type petCompanionAssetKeys =
   | "Rusty";
 
 export const petCompanions: Record<petCompanionAssetKeys, Asset> = {
-  "Luna": { icon: lunaIcon, sprite: luna, price: 3000 },
-  "Ember the fox": { icon: emberTheFoxIcon, sprite: emberTheFox },
+  "Luna": { icon: lunaIcon, sprite: luna },
+  "Ember the fox": { icon: emberTheFoxIcon, sprite: emberTheFox, price: 5000 },
   "Maple": { icon: mapleIcon, sprite: maple, price: 3000 },
   "Milo": { icon: miloIcon, sprite: milo, price: 3000 },
   "Nova": { icon: novaIcon, sprite: nova, price: 3000 },

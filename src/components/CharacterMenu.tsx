@@ -51,7 +51,7 @@ const CharacterMenu = () => {
     male: "sandstone",
     female: "sandstone"
   })
-  const setPetSelectIndex = useState(0)[1]
+  const [petSelectIndex, setPetSelectIndex] = useState(0)
 
   const characterColors = ["ivory", "onyx", "bronze", "sandstone", "umber"];
 
@@ -482,6 +482,8 @@ const CharacterMenu = () => {
     },
   ];
 
+  const petPrice = petCompanions[Object.keys(petCompanions)[petSelectIndex % Object.keys(petCompanions).length] as keyof typeof petCompanions].price
+
   return (
     <div className="absolute inset-0 flex items-center justify-center z-10 p-4">
       {/* Main Menu Container */}
@@ -586,7 +588,7 @@ const CharacterMenu = () => {
                   {/* Pet sprite */}
                 </div>
               </div>
-              {<PriceBox price={100} clickHandler={() => ({})} />}
+              {petPrice? <PriceBox price={petPrice} clickHandler={() => ({})} /> :<></>}
               <ArrowButtons rightArrowClick={handlePetSpriteRightArrowClick} leftArrowClick={handlePetSpriteLeftArrowClick}/>
             </div>
 

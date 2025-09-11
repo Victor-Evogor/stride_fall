@@ -18,6 +18,14 @@ import {
 } from "../assetMap";
 import damageBar from "../assets/UI/MinimumDamage/minimum_damage.png";
 
+// pets
+import luna from "../assets/pet_companion/luna.png";
+import maple from "../assets/pet_companion/maple.png";
+import milo from "../assets/pet_companion/milo.png";
+import nova from "../assets/pet_companion/nova.png";
+import rusty from "../assets/pet_companion/rusty.png";
+import ember from "../assets/pet_companion/ember_the_fox.png";
+
 // -- characters --
 
 // skins
@@ -122,6 +130,16 @@ class GameScene extends Phaser.Scene {
   selectedCharacter = DEFAULT_CHARACTER;
   characterXOffset = 100;
   playerContainer: Phaser.GameObjects.Container | null = null;
+  petCompanion: Phaser.GameObjects.Sprite | null = null;
+  petCompanionContainer: Phaser.GameObjects.Container | null = null;
+  pets: [string, string][]= [
+    ["Luna", luna],
+    ["Maple", maple],
+    ["Milo", milo],
+    ["Nova", nova],
+    ["Rusty", rusty],
+    ["Ember the fox", ember]
+  ]
 
   constructor() {
     super("GameScene");
@@ -267,6 +285,20 @@ class GameScene extends Phaser.Scene {
           frameWidth: 80,
           frameHeight: 64,
         });
+      });
+    });
+
+    Object.keys(petAccessories).forEach(key => {
+      this.load.spritesheet(key, petAccessories[key as PetAccessoriesAssetKeys].sprite, {
+        frameWidth: 32,
+        frameHeight: 32,
+      })
+    })
+
+    this.pets.forEach((pet) => {
+      this.load.spritesheet(pet[0], pet[1], {
+        frameWidth: 32,
+        frameHeight: 32,
       });
     });
   }

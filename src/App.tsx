@@ -4,19 +4,25 @@ import TopBar from "./components/Top"
 import Timer from "./components/Timer"
 import PauseMenu from "./components/PauseMenu"
 import CharacterMenu from "./components/CharacterMenu"
+import InfoMenu from "./components/InfoMenu" 
 import { useAppContext } from "./AppContext"
 
 function App() {
-  const {isCharacterCustomizeMenuOpen} = useAppContext()
+  const {
+    isCharacterCustomizeMenuOpen,
+    isInfoMenuOpen,   // 👈 bring from context
+  } = useAppContext()
 
   return (
     <main className="relative w-screen h-screen overflow-hidden">
-        <Timer/>
+      <Timer/>
       <TopBar/>
       <MainMenu/>
       <Game/>
       <PauseMenu/>
-      {isCharacterCustomizeMenuOpen? <CharacterMenu/> : <></>}
+
+      {isCharacterCustomizeMenuOpen ? <CharacterMenu/> : null}
+      {isInfoMenuOpen ? <InfoMenu/> : null}   
     </main>
   )
 }

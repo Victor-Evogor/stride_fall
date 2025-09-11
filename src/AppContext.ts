@@ -19,6 +19,8 @@ export interface AppContextType {
   setGameConfig: Dispatch<SetStateAction<GameConfigType>>;
   isCharacterCustomizeMenuOpen: boolean;
   setIsCharacterCustomizeMenuOpen: Dispatch<SetStateAction<boolean>>;
+  isInfoMenuOpen: boolean;
+  setIsInfoMenuOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppContextType | null>(null);

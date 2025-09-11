@@ -43,6 +43,7 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
     hair: null,
     petAccessory: null,
   });
+  const [isInfoMenuOpen, setIsInfoMenuOpen] = useState(false)
 
   return (
     <AppContext.Provider
@@ -59,6 +60,8 @@ const AppProvider: FunctionComponent<PropsWithChildren> = ({ children }) => {
         isCharacterCustomizeMenuOpen,
         setIsCharacterCustomizeMenuOpen,
         setGameConfig,
+        isInfoMenuOpen,
+        setIsInfoMenuOpen
       }}
     >
       {children}

@@ -2,7 +2,7 @@
 
 A modern take on the classic endless runner genre, built with **TypeScript**, **React**, and **Phaser**. Jump, dodge obstacles, and customize your character in this enhanced Chrome Dino-style game featuring beautiful pixel art graphics and extensive character customization.
 
-![StrideFall Gameplay Preview](https://victor-evogor.github.io/stride_fall/stridefall_preview.gif)
+![StrideFall Gameplay Preview](https://res.cloudinary.com/djaqusrpx/image/upload/v1757933165/stridefall_preview_qllqpk.gif)
 
 ## 🎮 Game Features
 

@@ -113,3 +113,7 @@ This game is in **near-complete** state with core gameplay and customization sys
 ---
 
 *Built with modern web technologies for smooth gameplay and responsive character customization. Challenge yourself to beat your high score while creating the perfect pixel art character!*
+
+## 🎯 Support Development
+
+If you enjoy StrideFall and want to support continued development of new features like pet companions and mobile compatibility, consider [sponsoring the project](https://github.com/sponsors/Victor-Evogor).
